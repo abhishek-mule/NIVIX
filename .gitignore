@@ -1,0 +1,32 @@
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+.env
+
+# Nivix Runtime Outputs
+*.cir
+*.trace
+*.audit.json
+nivix_output/
+
+# Renderer Outputs (Manim, etc.)
+media/
+videos/
+images/
+*.mp4
+*.m4v
+*.png
+*.gif
+
+# IDE / System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

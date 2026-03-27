@@ -1,0 +1,23 @@
+# Nivix Example: Hierarchical Layout
+# Prompt: Explain the relationship between the numerator and denominator in a fraction.
+
+### 1. INPUT (prompt)
+"Explain the relationship between the numerator (top) and denominator (bottom) in a fraction."
+
+### 2. SYMBOLIC ANALYSIS
+- Intent: Describe_Relation(Numerator, Denominator)
+- Hierarchy: Vertical_Layout (Numerator above Denominator)
+- Group: Fraction_Group(Numerator, Denominator, Fraction_Bar)
+- Anchor: Label("top") -> Numerator, Label("bottom") -> Denominator
+
+### 3. CIR EXPECTATION (v3.9)
+- Spawn(Numerator, text='Numerator')
+- Spawn(Denominator, text='Denominator')
+- Align(Numerator, Denominator, axis='vertical')
+- Group(Numerator, Denominator, name='fraction')
+- Highlight(Numerator, duration=2.5)
+- Highlight(Denominator, duration=2.5)
+
+### 4. PEDAGOGICAL SCORE
+- Hierarchy Score: 1.0 (Audit verified)
+- Group Membership: Verified (Fraction_Group exists)

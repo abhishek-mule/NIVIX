@@ -1,0 +1,90 @@
+
+--- Welcome to NIVIX Pipeline v0.9 [Multi-Phase Segmentation] ---
+Enter animation prompt: 
+--- Parsing User Intent (Temporal Detection Active)... ---
+--- [DEBUG] Simulating Narrative Cinematic Transition (v1.7 Active) ---
+Using: reka/reka-edge (Generation Validated)
+--- Executing JSON Syntax Repair & Schema Normalization... ---
+--- Normalizing Semantics with Confidence Tagging... ---
+--- Applying Default Policies & Hierarchy Mapping... ---
+--- Calculating Temporal Timeline (DAG Planning)... ---
+python : Traceback (most 
+recent call last):
+At line:1 char:24
++ ... fade to graph" | 
+python main.py > 
+transition_test_v5.txt 2>&1 
+; Get-C ...
++                      ~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (Traceba  
+  ck (most recent call las   
+ t)::String) [], RemoteEx    
+ception
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\core\scheduler\tra
+ck_scheduler.py", line 123, 
+in schedule_tracks
+    try: detector.validate()
+         ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\core\scheduler\con
+flict_detector.py", line 23, 
+in validate
+    self._check_for_cycles()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\core\scheduler\con
+flict_detector.py", line 58, 
+in _check_for_cycles
+    raise TemporalDependencyC
+ycleError(f"Circular 
+dependency detected in the 
+animation timeline near: 
+{node}")
+core.scheduler.conflict_detec
+tor.TemporalDependencyCycleEr
+ror: Circular dependency 
+detected in the animation 
+timeline near: 
+geometry_step_0_axis_x
+
+During handling of the above 
+exception, another exception 
+occurred:
+
+Traceback (most recent call 
+last):
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\main.py", line 
+70, in <module>
+    nivix_pipeline()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\main.py", line 
+49, in nivix_pipeline
+    timed_ir = schedule_track
+s(full_semantic_ir)
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\core\scheduler\tra
+ck_scheduler.py", line 124, 
+in schedule_tracks
+    except 
+TemporalDependencyCycleError 
+as e: raise 
+Exception(f"Animation 
+Orchestration Error: {e}")
+                             
+                 ^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^
+Exception: Animation 
+Orchestration Error: 
+Circular dependency detected 
+in the animation timeline 
+near: geometry_step_0_axis_x

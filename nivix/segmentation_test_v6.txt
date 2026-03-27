@@ -1,0 +1,80 @@
+
+--- Welcome to NIVIX Pipeline v0.9 [Multi-Phase Segmentation] ---
+Enter animation prompt: 
+--- Parsing User Intent (Temporal Detection Active)... ---
+--- [DEBUG] Simulating Multi-Phase Scene Segmentation (v0.9 Active) ---
+Using: reka/reka-edge (Generation Validated)
+--- Executing JSON Syntax Repair & Schema Normalization... ---
+--- Normalizing Semantics with Confidence Tagging... ---
+--- Applying Default Policies & Hierarchy Mapping... ---
+--- Calculating Temporal Timeline (DAG Planning)... ---
+python : Traceback (most 
+recent call last):
+At line:1 char:83
++ ... m camera in" | python 
+main.py > 
+segmentation_test_v5.txt 
+2>&1 ; Get-C ...
++                    ~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (Traceba  
+  ck (most recent call las   
+ t)::String) [], RemoteEx    
+ception
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\main.py", line 
+70, in <module>
+    nivix_pipeline()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\main.py", line 
+49, in nivix_pipeline
+    timed_ir = schedule_track
+s(full_semantic_ir)
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\core\scheduler\tra
+ck_scheduler.py", line 83, 
+in schedule_tracks
+    schedule = 
+dag.get_schedule()
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\core\scheduler\tem
+poral_graph.py", line 60, in 
+get_schedule
+    self.compute_all_start_ti
+mes()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~^^
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\core\scheduler\tem
+poral_graph.py", line 56, in 
+compute_all_start_times
+    resolve_node(node_id)
+    ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\core\scheduler\tem
+poral_graph.py", line 49, in 
+resolve_node
+    max_end = 
+max(resolve_node(d) + 
+self.nodes[d]["duration"] 
+for d in deps)
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\core\scheduler\tem
+poral_graph.py", line 49, in 
+<genexpr>
+    max_end = 
+max(resolve_node(d) + 
+self.nodes[d]["duration"] 
+for d in deps)
+                  ~~~~~~~~~~~
+~~~~~^~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+TypeError: unsupported 
+operand type(s) for +: 
+'float' and 'dict'

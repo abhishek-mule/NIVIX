@@ -1,0 +1,67 @@
+
+--- Welcome to NIVIX Pipeline v0.9 [Multi-Phase Segmentation] ---
+Enter animation prompt: 
+--- Parsing User Intent (Temporal Detection Active)... ---
+--- [DEBUG] Simulating Relational Anchoring (v1.2 Active) ---
+Using: reka/reka-edge (Generation Validated)
+--- Executing JSON Syntax Repair & Schema Normalization... ---
+--- Normalizing Semantics with Confidence Tagging... ---
+--- Applying Default Policies & Hierarchy Mapping... ---
+--- Calculating Temporal Timeline (DAG Planning)... ---
+--- Segmenting Multi-Phase Timeline (Cinematic Cuts)... ---
+--- Executing Execution IR Lowering Pass (Cleaning Stage)... ---
+--- Finalizing Multi-Scene Execution Graph... ---
+
+[Multi-Phase Execution Graph (Renderer View)]:
+{
+    "scenes": [
+        {
+            "id": 0,
+            "objects": [
+                {
+                    "id": "square_0",
+                    "type": "square",
+                    "color": "red",
+                    "motion": "none",
+                    "duration": 1.0,
+                    "scale": 1.0,
+                    "track_id": 0,
+                    "scene_id": 0,
+                    "start_time": 0.0
+                }
+            ],
+            "text_objects": [
+                {
+                    "id": "label_0",
+                    "type": "text",
+                    "style": "label",
+                    "content": "mass",
+                    "anchor_to": "square_0",
+                    "anchor_position": "top",
+                    "motion": "none",
+                    "duration": 1.0,
+                    "scene_id": 0,
+                    "start_time": 1.0,
+                    "track_id": 1
+                }
+            ],
+            "math_objects": [],
+            "camera": {
+                "motions": []
+            },
+            "background": {
+                "color": "black"
+            },
+            "timeline": {
+                "duration": 5.0,
+                "fps": 30,
+                "tracks": []
+            },
+            "sequence_mode": "sequential"
+        }
+    ],
+    "metadata": {
+        "diagnostics": {},
+        "compiler_version": "0.9-MultiPhase"
+    }
+}

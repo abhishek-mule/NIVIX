@@ -1,0 +1,87 @@
+
+--- Welcome to NIVIX Pipeline v0.9 [Multi-Phase Segmentation] ---
+Enter animation prompt: 
+--- Parsing User Intent (Temporal Detection Active)... ---
+Using: reka/reka-edge (Generation Validated)
+--- Executing JSON Syntax Repair & Schema Normalization... ---
+--- Normalizing Semantics with Confidence Tagging... ---
+--- Applying Default Policies & Hierarchy Mapping... ---
+--- Calculating Temporal Timeline (DAG Planning)... ---
+--- Segmenting Multi-Phase Timeline (Cinematic Cuts)... ---
+--- Executing Execution IR Lowering Pass (Cleaning Stage)... ---
+--- Finalizing Multi-Scene Execution Graph... ---
+
+[Multi-Phase Execution Graph (Renderer View)]:
+{
+    "scenes": [
+        {
+            "id": 0,
+            "objects": [
+                {
+                    "id": "A",
+                    "type": "circle",
+                    "motion": "none",
+                    "duration": 1.0,
+                    "color": "white",
+                    "scale": 1.0,
+                    "track_id": 0,
+                    "scene_id": 0,
+                    "start_time": 0.0
+                },
+                {
+                    "id": "sq_0",
+                    "type": "square",
+                    "motion": "none",
+                    "duration": 1.0,
+                    "color": "white",
+                    "scale": 1.0,
+                    "track_id": 1,
+                    "scene_id": 0,
+                    "start_time": 1.0
+                }
+            ],
+            "text_objects": [],
+            "math_objects": [],
+            "equation_transforms": [],
+            "group_objects": [
+                {
+                    "id": "tri",
+                    "members": [
+                        "A"
+                    ],
+                    "scene_id": 0,
+                    "start_time": 2.0,
+                    "track_id": 3
+                },
+                {
+                    "id": "scene",
+                    "members": [
+                        "tri",
+                        "sq_0"
+                    ],
+                    "motion": "right",
+                    "scene_id": 0,
+                    "start_time": 3.0,
+                    "track_id": 3
+                }
+            ],
+            "transitions_in": [],
+            "camera": {
+                "motions": []
+            },
+            "background": {
+                "color": "black"
+            },
+            "timeline": {
+                "duration": 5.0,
+                "fps": 30,
+                "tracks": []
+            },
+            "sequence_mode": "sequential"
+        }
+    ],
+    "metadata": {
+        "diagnostics": {},
+        "compiler_version": "0.9-MultiPhase"
+    }
+}

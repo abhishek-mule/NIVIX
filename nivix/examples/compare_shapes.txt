@@ -1,0 +1,23 @@
+# Nivix Example: Comparison Reasoning
+# Prompt: Compare a red triangle and a blue square.
+
+### 1. INPUT (prompt)
+"Compare a red triangle and a blue square. Highlight their differences."
+
+### 2. SYMBOLIC ANALYSIS
+- Intent: Compare(RedTriangle, BlueSquare)
+- Template: Symmetric_Comparison_v1
+- Layout Constraint: Horizontal_Alignment (Align axis='horizontal')
+- Attention Gaze: Mirrored_Focus (Triangle focus -> Square focus -> Both)
+
+### 3. CIR EXPECTATION (v3.9)
+- Spawn(Triangle, color='red')
+- Spawn(Square, color='blue')
+- Align(Triangle, Square, axis='horizontal')
+- Highlight(Triangle, duration=2.0)
+- Highlight(Square, duration=2.0)
+- Compare(Triangle, Square, type='difference')
+
+### 4. PEDAGOGICAL SCORE
+- Intent Satisfaction: 1.0 (Audit verified)
+- Symmetry Score: 1.0

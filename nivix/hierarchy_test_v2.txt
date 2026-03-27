@@ -1,0 +1,76 @@
+
+--- Welcome to NIVIX Pipeline v0.9 [Multi-Phase Segmentation] ---
+Enter animation prompt: 
+--- Parsing User Intent (Temporal Detection Active)... ---
+--- [DEBUG] Simulating Hierarchical Diagram Composition (v1.6 Active) ---
+Using: reka/reka-edge (Generation Validated)
+--- Executing JSON Syntax Repair & Schema Normalization... ---
+--- Normalizing Semantics with Confidence Tagging... ---
+--- Applying Default Policies & Hierarchy Mapping... ---
+--- Calculating Temporal Timeline (DAG Planning)... ---
+--- Segmenting Multi-Phase Timeline (Cinematic Cuts)... ---
+--- Executing Execution IR Lowering Pass (Cleaning Stage)... ---
+--- Finalizing Multi-Scene Execution Graph... ---
+
+[Multi-Phase Execution Graph (Renderer View)]:
+{
+    "scenes": [
+        {
+            "id": 0,
+            "objects": [],
+            "text_objects": [
+                {
+                    "id": "label_0",
+                    "type": "text",
+                    "content": "force",
+                    "anchor_to": "eq_0",
+                    "anchor_symbol": "F",
+                    "scene_id": 0,
+                    "start_time": 0.0,
+                    "track_id": 1
+                }
+            ],
+            "math_objects": [
+                {
+                    "id": "eq_0",
+                    "type": "mathtex",
+                    "content": "F=ma",
+                    "scene_id": 0,
+                    "start_time": 1.0,
+                    "track_id": 2
+                }
+            ],
+            "equation_transforms": [],
+            "group_objects": [
+                {
+                    "id": "physics_0",
+                    "type": "group",
+                    "members": [
+                        "eq_0",
+                        "label_0"
+                    ],
+                    "motion": "up",
+                    "scene_id": 0,
+                    "start_time": 2.0,
+                    "track_id": 3
+                }
+            ],
+            "camera": {
+                "motions": []
+            },
+            "background": {
+                "color": "black"
+            },
+            "timeline": {
+                "duration": 5.0,
+                "fps": 30,
+                "tracks": []
+            },
+            "sequence_mode": "sequential"
+        }
+    ],
+    "metadata": {
+        "diagnostics": {},
+        "compiler_version": "0.9-MultiPhase"
+    }
+}

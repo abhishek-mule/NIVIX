@@ -1,0 +1,89 @@
+
+--- Welcome to NIVIX Pipeline v0.9 [Multi-Phase Segmentation] ---
+Enter animation prompt: 
+--- Parsing User Intent (Temporal Detection Active)... ---
+--- [DEBUG] Simulating Structural Object Grouping (v1.4 Active) ---
+Using: reka/reka-edge (Generation Validated)
+--- Executing JSON Syntax Repair & Schema Normalization... ---
+--- Normalizing Semantics with Confidence Tagging... ---
+--- Applying Default Policies & Hierarchy Mapping... ---
+--- Calculating Temporal Timeline (DAG Planning)... ---
+--- Segmenting Multi-Phase Timeline (Cinematic Cuts)... ---
+--- Executing Execution IR Lowering Pass (Cleaning Stage)... ---
+--- Finalizing Multi-Scene Execution Graph... ---
+
+[Multi-Phase Execution Graph (Renderer View)]:
+{
+    "scenes": [
+        {
+            "id": 0,
+            "objects": [
+                {
+                    "id": "sq_0",
+                    "type": "square",
+                    "color": "white",
+                    "motion": "none",
+                    "duration": 1.0,
+                    "scale": 1.0,
+                    "track_id": 0,
+                    "scene_id": 0,
+                    "start_time": 0.0
+                },
+                {
+                    "id": "ci_0",
+                    "type": "circle",
+                    "color": "blue",
+                    "motion": "none",
+                    "duration": 1.0,
+                    "scale": 1.0,
+                    "track_id": 1,
+                    "scene_id": 0,
+                    "start_time": 1.0
+                }
+            ],
+            "text_objects": [],
+            "math_objects": [],
+            "equation_transforms": [],
+            "group_objects": [
+                {
+                    "id": "group_A",
+                    "type": "group",
+                    "members": [
+                        "sq_0",
+                        "ci_0"
+                    ],
+                    "motion": "right",
+                    "duration": 1.5,
+                    "scene_id": 0,
+                    "start_time": 2.0,
+                    "track_id": 3
+                }
+            ],
+            "camera": {
+                "motions": [
+                    {
+                        "type": "zoom",
+                        "direction": "in",
+                        "duration": 1.0,
+                        "scene_id": 0,
+                        "start_time": 3.5,
+                        "track_id": -1
+                    }
+                ]
+            },
+            "background": {
+                "color": "black"
+            },
+            "timeline": {
+                "duration": 5.0,
+                "fps": 30,
+                "tracks": []
+            },
+            "sequence_mode": "sequential"
+        }
+    ],
+    "metadata": {
+        "diagnostics": {},
+        "compiler_version": "0.9-MultiPhase"
+    }
+}

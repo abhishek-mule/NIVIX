@@ -1,0 +1,133 @@
+
+--- Welcome to NIVIX Pipeline v0.9 [Multi-Phase Segmentation] ---
+Enter animation prompt: 
+--- Parsing User Intent (Temporal Detection Active)... ---
+--- [DEBUG] Simulating Narrative Cinematic Transition (v1.7 Active) ---
+Using: reka/reka-edge (Generation Validated)
+--- Executing JSON Syntax Repair & Schema Normalization... ---
+--- Normalizing Semantics with Confidence Tagging... ---
+--- Applying Default Policies & Hierarchy Mapping... ---
+--- Calculating Temporal Timeline (DAG Planning)... ---
+--- Segmenting Multi-Phase Timeline (Cinematic Cuts)... ---
+--- Executing Execution IR Lowering Pass (Cleaning Stage)... ---
+--- Finalizing Multi-Scene Execution Graph... ---
+
+[Multi-Phase Execution Graph (Renderer View)]:
+{
+    "scenes": [
+        {
+            "id": 0,
+            "objects": [],
+            "text_objects": [],
+            "math_objects": [
+                {
+                    "id": "eq_0",
+                    "type": "mathtex",
+                    "content": "F=ma",
+                    "duration": 1.0,
+                    "scene_id": 0,
+                    "start_time": 0.0,
+                    "track_id": 2
+                }
+            ],
+            "equation_transforms": [],
+            "group_objects": [
+                {
+                    "id": "graph_0",
+                    "type": "group",
+                    "members": [
+                        "axis_x",
+                        "axis_y",
+                        "line_0"
+                    ],
+                    "motion": "none",
+                    "scene_id": 0,
+                    "start_time": 1.0,
+                    "track_id": 3
+                }
+            ],
+            "transitions_in": [],
+            "camera": {
+                "motions": []
+            },
+            "background": {
+                "color": "black"
+            },
+            "timeline": {
+                "duration": 5.0,
+                "fps": 30,
+                "tracks": []
+            },
+            "sequence_mode": "sequential"
+        },
+        {
+            "id": 1,
+            "objects": [
+                {
+                    "id": "axis_x",
+                    "type": "square",
+                    "scale": 0.1,
+                    "motion": "none",
+                    "duration": 1.0,
+                    "color": "white",
+                    "track_id": 0,
+                    "scene_id": 1,
+                    "start_time": 3.5
+                },
+                {
+                    "id": "axis_y",
+                    "type": "square",
+                    "scale": 0.1,
+                    "motion": "none",
+                    "duration": 1.0,
+                    "color": "white",
+                    "track_id": 0,
+                    "scene_id": 1,
+                    "start_time": 4.5
+                },
+                {
+                    "id": "line_0",
+                    "type": "triangle",
+                    "scale": 0.5,
+                    "motion": "none",
+                    "duration": 1.0,
+                    "color": "white",
+                    "track_id": 0,
+                    "scene_id": 1,
+                    "start_time": 5.5
+                }
+            ],
+            "text_objects": [],
+            "math_objects": [],
+            "equation_transforms": [],
+            "group_objects": [],
+            "transitions_in": [
+                {
+                    "id": "intro_to_graph",
+                    "type": "transition",
+                    "style": "fade",
+                    "from_scene": 0,
+                    "to_scene": 1,
+                    "duration": 1.5,
+                    "start_time": 2.0
+                }
+            ],
+            "camera": {
+                "motions": []
+            },
+            "background": {
+                "color": "black"
+            },
+            "timeline": {
+                "duration": 5.0,
+                "fps": 30,
+                "tracks": []
+            },
+            "sequence_mode": "sequential"
+        }
+    ],
+    "metadata": {
+        "diagnostics": {},
+        "compiler_version": "0.9-MultiPhase"
+    }
+}

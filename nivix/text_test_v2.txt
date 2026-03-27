@@ -1,0 +1,62 @@
+
+--- Welcome to NIVIX Pipeline v0.9 [Multi-Phase Segmentation] ---
+Enter animation prompt: 
+--- Parsing User Intent (Temporal Detection Active)... ---
+--- [DEBUG] Simulating Semantic Text Extraction (v1.0 Active) ---
+Using: reka/reka-edge (Generation Validated)
+--- Executing JSON Syntax Repair & Schema Normalization... ---
+--- Normalizing Semantics with Confidence Tagging... ---
+--- Applying Default Policies & Hierarchy Mapping... ---
+--- Calculating Temporal Timeline (DAG Planning)... ---
+--- Segmenting Multi-Phase Timeline (Cinematic Cuts)... ---
+--- Executing Execution IR Lowering Pass (Cleaning Stage)... ---
+--- Finalizing Multi-Scene Execution Graph... ---
+
+[Multi-Phase Execution Graph (Renderer View)]:
+{
+    "scenes": [
+        {
+            "objects": [],
+            "text_objects": [
+                {
+                    "type": "text",
+                    "style": "title",
+                    "content": "Hello World",
+                    "duration": 2.0,
+                    "scene_id": 0,
+                    "start_time": 0.0,
+                    "track_id": 1
+                }
+            ],
+            "camera": {
+                "motions": [],
+                "type": "orthographic",
+                "position": [
+                    0,
+                    0,
+                    10
+                ],
+                "target": [
+                    0,
+                    0,
+                    0
+                ],
+                "zoom": 1.0,
+                "projection": "perspective_off"
+            },
+            "sequence_mode": "sequential",
+            "timeline": {
+                "duration": 5.0,
+                "fps": 30,
+                "tracks": []
+            },
+            "background": {
+                "color": "black"
+            }
+        }
+    ],
+    "metadata": {
+        "diagnostics": {},
+        "compiler_version": "0.9-MultiPhase"
+    }
+}

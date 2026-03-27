@@ -1,0 +1,39 @@
+# Nivix Scene Schema v1.7
+# Upgraded with Scene Transitions and Cinematic Narrative Continuity (v1.7).
+
+{
+  "scene": {
+    "objects": [],
+    "text_objects": [],
+    "math_objects": [],
+    "equation_transforms": [],
+    "group_objects": [],
+    "scene_transitions": [
+      {
+        "id": "trans_0_1",
+        "type": "transition",
+        "style": "fade",
+        "duration": 1.0,
+        "from_scene": 0,
+        "to_scene": 1
+      }
+    ],
+    "camera": {
+      "motions": []
+    },
+    "timeline": {
+      "duration": 10.0,
+      "fps": 30,
+      "tracks": [
+        {"id": 0, "name": "geometry_layer"},
+        {"id": 1, "name": "text_layer"},
+        {"id": 2, "name": "math_layer"},
+        {"id": 3, "name": "group_layer"},
+        {"id": -1, "name": "camera_track"}
+      ]
+    },
+    "background": {
+      "color": "black"
+    }
+  }
+}

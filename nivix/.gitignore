@@ -1,0 +1,8 @@
+# Nivix Project Environment
+.env
+__pycache__/
+*.pyc
+outputs/
+*.mp4
+*.png
+*.log

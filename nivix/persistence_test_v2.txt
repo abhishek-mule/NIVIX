@@ -1,0 +1,48 @@
+
+--- Welcome to NIVIX Pipeline v0.9 [Multi-Phase Segmentation] ---
+Enter animation prompt: 
+--- Parsing User Intent (Temporal Detection Active)... ---
+--- [DEBUG] Simulating Persistent Anchored Transformation (v1.5 Active) ---
+Using: reka/reka-edge (Generation Validated)
+--- Executing JSON Syntax Repair & Schema Normalization... ---
+python : Traceback (most 
+recent call last):
+At line:1 char:99
++ ... nto \"a = F/m\"" | 
+python main.py > 
+persistence_test.txt 2>&1 ; 
+Get-C ...
++                        ~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (Traceba  
+  ck (most recent call las   
+ t)::String) [], RemoteEx    
+ception
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\main.py", line 
+70, in <module>
+    nivix_pipeline()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\main.py", line 
+36, in nivix_pipeline
+    
+validate(normalized_intent)
+    
+~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\core\validator\val
+idator.py", line 11, in 
+validate
+    raise 
+Exception("Validation Error: 
+No recognized 'scene' or 
+'objects' key found.")
+Exception: Validation Error: 
+No recognized 'scene' or 
+'objects' key found.

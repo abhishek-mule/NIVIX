@@ -1,0 +1,60 @@
+
+--- Welcome to NIVIX Pipeline v0.9 [Multi-Phase Segmentation] ---
+Enter animation prompt: 
+--- Parsing User Intent (Temporal Detection Active)... ---
+--- [DEBUG] Simulating Relational Anchoring (v1.2 Active) ---
+Using: reka/reka-edge (Generation Validated)
+--- Executing JSON Syntax Repair & Schema Normalization... ---
+--- Normalizing Semantics with Confidence Tagging... ---
+--- Applying Default Policies & Hierarchy Mapping... ---
+--- Calculating Temporal Timeline (DAG Planning)... ---
+python : Traceback (most 
+recent call last):
+At line:1 char:82
++ ... move square right" | 
+python main.py > 
+anchoring_test.txt 2>&1 ; 
+Get-C ...
++                          ~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (Traceba  
+  ck (most recent call las   
+ t)::String) [], RemoteEx    
+ception
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\main.py", line 
+70, in <module>
+    nivix_pipeline()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\main.py", line 
+49, in nivix_pipeline
+    timed_ir = schedule_track
+s(full_semantic_ir)
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\core\scheduler\tra
+ck_scheduler.py", line 104, 
+in schedule_tracks
+    register_actor_list(text_
+objects, "text")
+    ~~~~~~~~~~~~~~~~~~~^^^^^^
+^^^^^^^^^^^^^^^^
+  File "C:\Users\HP\Desktop\N
+IVIX\nivix\core\scheduler\tra
+ck_scheduler.py", line 84, 
+in register_actor_list
+    dag.add_edge(id_to_node[a
+nchor_id], node_id, 
+concurrent=True)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^
+TypeError: 
+TemporalGraph.add_edge() got 
+an unexpected keyword 
+argument 'concurrent'
