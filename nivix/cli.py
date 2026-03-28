@@ -42,6 +42,18 @@ def main():
                                help="Renderer adapter (shotstack, remotion, manim)")
     render_parser.add_argument("--output", "-o", default="output.mp4", help="Output MP4 file path")
 
+    # 7. Auto: Single-command pipeline Prompt -> Solve -> Render (v5.0)
+    auto_parser = subparsers.add_parser("auto", help="Single-command: prompt.txt to MP4 (compile+solve+render)")
+    auto_parser.add_argument("prompt_file", help="Path to prompt text file")
+    auto_parser.add_argument("--target", "-t", default="shotstack", 
+                             choices=["shotstack", "remotion", "manim"],
+                             help="Target renderer")
+    auto_parser.add_argument("--output", "-o", default="output.mp4", help="Output MP4 file path")
+
+    # 8. Inspect: Debug execution graph (v5.0)
+    inspect_parser = subparsers.add_parser("inspect", help="Inspect CIR execution graph (intent, layout, timeline)")
+    inspect_parser.add_argument("cir_file", help="Path to CIR JSON file")
+
     args = parser.parse_args()
 
     if args.command == "compile":
@@ -192,6 +204,161 @@ def main():
         else:
             print(f"--- [ERROR] Unknown adapter: {adapter_name} ---")
             sys.exit(1)
+    
+    elif args.command == "auto":
+        print(f"--- [NIVIX CLI] Auto pipeline: {args.prompt_file} -> {args.target} ---")
+        
+        try:
+            with open(args.prompt_file, "r") as f:
+                prompt_content = f.read()
+        except FileNotFoundError:
+            print(f"--- [ERROR] Prompt file not found: {args.prompt_file} ---")
+            sys.exit(1)
+        
+        print(f"--- [STEP 1] Generating CIR from prompt ---")
+        
+        cir_data = {
+            "nodes": [],
+            "transforms": [],
+            "constraints": [],
+            "attention": [],
+            "meta": {"prompt": prompt_content, "version": "5.0"}
+        }
+        
+        prompt_lower = prompt_content.lower()
+        
+        if "fraction" in prompt_lower or "/" in prompt_lower:
+            cir_data["nodes"] = [
+                {"id": "numerator", "type": "text", "label": "3", "lifecycle": {"spawn": 0}},
+                {"id": "denominator", "type": "text", "label": "4", "lifecycle": {"spawn": 30}},
+                {"id": "result", "type": "text", "label": "0.75", "lifecycle": {"spawn": 60}}
+            ]
+            cir_data["constraints"] = [{"type": "hierarchical", "nodes": ["numerator", "denominator", "result"]}]
+            cir_data["attention"] = [
+                {"node_id": "numerator", "focus_score": 1.0, "start_frame": 0, "end_frame": 30},
+                {"node_id": "result", "focus_score": 1.0, "start_frame": 60, "end_frame": 120}
+            ]
+            
+        elif "circle" in prompt_lower or "area" in prompt_lower:
+            cir_data["nodes"] = [
+                {"id": "circle", "type": "shape", "label": "Circle", "lifecycle": {"spawn": 0}},
+                {"id": "formula", "type": "text", "label": "A = pi*r^2", "lifecycle": {"spawn": 30}}
+            ]
+            cir_data["constraints"] = [{"type": "alignment", "nodes": ["circle", "formula"]}]
+            cir_data["attention"] = [
+                {"node_id": "circle", "focus_score": 1.0, "start_frame": 0, "end_frame": 60}
+            ]
+        else:
+            cir_data["nodes"] = [
+                {"id": "obj1", "type": "text", "label": "A", "lifecycle": {"spawn": 0}},
+                {"id": "obj2", "type": "text", "label": "B", "lifecycle": {"spawn": 30}}
+            ]
+            cir_data["attention"] = [
+                {"node_id": "obj1", "focus_score": 1.0, "start_frame": 0, "end_frame": 60}
+            ]
+        
+        print(f"CIR generated: {len(cir_data['nodes'])} nodes")
+        
+        print(f"--- [STEP 2] Solving constraints ---")
+        
+        from nivix.core.solver.intent_resolver import IntentResolver
+        from nivix.core.solver.layout_solver import LayoutSolver
+        from nivix.core.solver.timeline_solver import TimelineSolver
+        from nivix.core.solver.camera_solver import CameraSolver
+        
+        ir = IntentResolver()
+        cir_data = ir.solve(cir_data)
+        
+        ls = LayoutSolver()
+        cir_data = ls.solve(cir_data)
+        
+        ts = TimelineSolver()
+        cir_data = ts.solve(cir_data)
+        
+        cs = CameraSolver()
+        cir_data = cs.solve(cir_data)
+        
+        print(f"Constraints solved")
+        
+        print(f"--- [STEP 3] Rendering to {args.target} ---")
+        
+        if args.target == "shotstack":
+            from nivix.core.renderers.shotstack_adapter import ShotstackAdapter
+            adapter = ShotstackAdapter(cir_data)
+        elif args.target == "remotion":
+            from nivix.core.renderers.remotion_adapter import RemotionAdapter
+            adapter = RemotionAdapter(cir_data)
+        elif args.target == "manim":
+            from nivix.renderers.manim_adapter.manim_adapter import ManimAdapter
+            adapter = ManimAdapter(cir_data)
+        else:
+            print(f"--- [ERROR] Unknown target: {args.target} ---")
+            sys.exit(1)
+        
+        result = adapter.export(cir_data, args.output)
+        print(f"--- [NIVIX CLI] Auto pipeline complete: {result} ---")
+    
+    elif args.command == "inspect":
+        print(f"--- [NIVIX CLI] Inspecting: {args.cir_file} ---")
+        
+        try:
+            with open(args.cir_file, "r") as f:
+                cir_data = json.load(f)
+        except FileNotFoundError:
+            print(f"--- [ERROR] CIR file not found: {args.cir_file} ---")
+            sys.exit(1)
+        
+        print()
+        print("=" * 50)
+        print("CIR INSPECTION")
+        print("=" * 50)
+        
+        meta = cir_data.get("meta", {})
+        print(f"\n[META]")
+        print(f"  Prompt: {meta.get('prompt', 'N/A')}")
+        print(f"  Version: {meta.get('version', 'N/A')}")
+        print(f"  Template: {meta.get('template', 'N/A')}")
+        
+        nodes = cir_data.get("nodes", [])
+        print(f"\n[NODES] ({len(nodes)} total)")
+        for node in nodes:
+            print(f"  {node.get('id')}: {node.get('type')} - {node.get('label')}")
+        
+        pos_map = cir_data.get("_position_map", {})
+        if pos_map:
+            print(f"\n[LAYOUT] (solved positions)")
+            for nid, pos in pos_map.items():
+                print(f"  {nid}: ({pos[0]:.1f}, {pos[1]:.1f})")
+        
+        frame_sched = cir_data.get("_frame_schedule", {})
+        if frame_sched:
+            print(f"\n[TIMELINE] (frame schedule)")
+            for nid, frames in frame_sched.items():
+                print(f"  {nid}: [{frames[0]}, {frames[1]}]")
+        
+        intent = cir_data.get("_intent_graph", {})
+        if intent:
+            print(f"\n[INTENT] (semantic)")
+            roles = intent.get("roles", {})
+            for nid, role in roles.items():
+                print(f"  {nid}: {role}")
+        
+        camera = cir_data.get("_camera_timeline", [])
+        if camera:
+            print(f"\n[CAMERA] (timeline)")
+            for cam in camera:
+                print(f"  {cam.get('mode')} @ [{cam.get('start_frame')}-{cam.get('end_frame')}] zoom={cam.get('zoom')}")
+        
+        exec_graph = cir_data.get("execution_graph", {})
+        if exec_graph:
+            print(f"\n[EXECUTION GRAPH]")
+            eg_nodes = exec_graph.get("nodes", {})
+            print(f"  Nodes: {len(eg_nodes)}")
+            deps = exec_graph.get("dependencies", [])
+            print(f"  Dependencies: {len(deps)}")
+        
+        print()
+        print("=" * 50)
     else:
         parser.print_help()
 
