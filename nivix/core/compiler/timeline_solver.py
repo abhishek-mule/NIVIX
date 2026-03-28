@@ -148,11 +148,24 @@ class DeterministicTimelineSolver:
         return order
     
     def _compute_frames(self, order: List[str], graph: Dict[str, List[str]]) -> Dict[str, int]:
-        """Compute frame offsets from execution order."""
-        frame_map = {}
+        """Compute frame offsets from dependency depth - parallel when same depth."""
+        depth_map = {}
         
-        for i, node in enumerate(order):
-            frame_map[node] = i * self.frame_unit
+        for node in order:
+            deps = graph.get(node, [])
+            if not deps:
+                depth_map[node] = 0
+            else:
+                max_depth = 0
+                for dep in deps:
+                    if dep in depth_map:
+                        max_depth = max(max_depth, depth_map[dep] + 1)
+                depth_map[node] = max_depth
+        
+        frame_map = {}
+        for node in order:
+            depth = depth_map.get(node, 0)
+            frame_map[node] = depth * self.frame_unit
         
         return frame_map
     
