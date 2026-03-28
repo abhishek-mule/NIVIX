@@ -215,49 +215,22 @@ def main():
             print(f"--- [ERROR] Prompt file not found: {args.prompt_file} ---")
             sys.exit(1)
         
-        print(f"--- [STEP 1] Generating CIR from prompt ---")
+        print(f"--- [STEP 1] Semantic Planning: {args.prompt_file} ---")
+        
+        from nivix.core.planner.semantic_planner_v6 import SemanticPlannerV6
+        
+        planner = SemanticPlannerV6()
+        plan_result = planner.plan(prompt_content)
         
         cir_data = {
-            "nodes": [],
+            "nodes": plan_result.get("nodes", []),
             "transforms": [],
-            "constraints": [],
-            "attention": [],
-            "meta": {"prompt": prompt_content, "version": "5.0"}
+            "constraints": plan_result.get("constraints", []),
+            "attention": plan_result.get("attention", []),
+            "meta": {"prompt": prompt_content, "version": "6.0", "task": plan_result.get("meta", {}).get("task", "sequence")}
         }
         
-        prompt_lower = prompt_content.lower()
-        
-        if "fraction" in prompt_lower or "/" in prompt_lower:
-            cir_data["nodes"] = [
-                {"id": "numerator", "type": "text", "label": "3", "lifecycle": {"spawn": 0}},
-                {"id": "denominator", "type": "text", "label": "4", "lifecycle": {"spawn": 30}},
-                {"id": "result", "type": "text", "label": "0.75", "lifecycle": {"spawn": 60}}
-            ]
-            cir_data["constraints"] = [{"type": "hierarchical", "nodes": ["numerator", "denominator", "result"]}]
-            cir_data["attention"] = [
-                {"node_id": "numerator", "focus_score": 1.0, "start_frame": 0, "end_frame": 30},
-                {"node_id": "result", "focus_score": 1.0, "start_frame": 60, "end_frame": 120}
-            ]
-            
-        elif "circle" in prompt_lower or "area" in prompt_lower:
-            cir_data["nodes"] = [
-                {"id": "circle", "type": "shape", "label": "Circle", "lifecycle": {"spawn": 0}},
-                {"id": "formula", "type": "text", "label": "A = pi*r^2", "lifecycle": {"spawn": 30}}
-            ]
-            cir_data["constraints"] = [{"type": "alignment", "nodes": ["circle", "formula"]}]
-            cir_data["attention"] = [
-                {"node_id": "circle", "focus_score": 1.0, "start_frame": 0, "end_frame": 60}
-            ]
-        else:
-            cir_data["nodes"] = [
-                {"id": "obj1", "type": "text", "label": "A", "lifecycle": {"spawn": 0}},
-                {"id": "obj2", "type": "text", "label": "B", "lifecycle": {"spawn": 30}}
-            ]
-            cir_data["attention"] = [
-                {"node_id": "obj1", "focus_score": 1.0, "start_frame": 0, "end_frame": 60}
-            ]
-        
-        print(f"CIR generated: {len(cir_data['nodes'])} nodes")
+        print(f"--- [PLANNER] Generated {len(cir_data['nodes'])} nodes, {len(cir_data['constraints'])} constraints")
         
         print(f"--- [STEP 2] Solving constraints ---")
         
