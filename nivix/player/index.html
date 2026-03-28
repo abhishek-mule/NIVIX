@@ -426,6 +426,17 @@
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Hidden until CIR loads */
+    .hidden-until-compile {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    .hidden-until-compile.revealed {
+      opacity: 1;
+      pointer-events: auto;
+    }
   </style>
 </head>
 <body>
@@ -473,7 +484,7 @@
     </div>
 
     <!-- Meta info -->
-    <div class="sidebar-section">
+    <div class="sidebar-section hidden-until-compile" id="metaSection">
       <div class="section-label">Execution Metadata</div>
       <div class="meta-grid">
         <div class="meta-card">
@@ -496,7 +507,7 @@
     </div>
 
     <!-- CIR Inspector -->
-    <div class="sidebar-section" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+    <div class="sidebar-section hidden-until-compile" id="inspectorSection" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
       <div class="section-label">CIR Inspector</div>
       <div class="json-inspector" id="jsonInspector">Awaiting compile…</div>
     </div>
@@ -505,7 +516,7 @@
 
   <!-- CANVAS AREA -->
   <div class="main">
-    <div class="canvas-toolbar">
+    <div class="canvas-toolbar hidden-until-compile" id="canvasToolbar">
       <div class="toolbar-left">
         <button class="toolbar-btn active" id="btnScene" onclick="setView('scene')">🎬 Scene</button>
         <button class="toolbar-btn" id="btnAttention" onclick="setView('attention')">👁 Attention</button>
@@ -526,7 +537,7 @@
       <canvas id="stage"></canvas>
     </div>
 
-    <div class="timeline-bar">
+    <div class="timeline-bar hidden-until-compile" id="timelineBar">
       <button class="play-btn" id="playBtn" onclick="togglePlay()">▶</button>
       <input type="range" id="scrubber" min="0" max="150" value="0" oninput="scrubTo(this.value)" />
     </div>
@@ -626,6 +637,10 @@
       // Update UI
       hideLoading();
       document.getElementById('emptyState').style.display = 'none';
+      // Reveal controls for the first time
+      ['canvasToolbar', 'timelineBar', 'metaSection', 'inspectorSection'].forEach(id => {
+        document.getElementById(id).classList.add('revealed');
+      });
       updateMeta(activeCIR, latency);
       updateJSONInspector(activeCIR);
       currentFrame = 0;
