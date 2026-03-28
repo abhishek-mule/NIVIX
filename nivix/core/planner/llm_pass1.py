@@ -1,20 +1,35 @@
 """
 Nivix LLM Pass 1: Real Object Graph Builder
-The FIRST real LLM integration in the Nivix compiler pipeline.
+The first real LLM integration in the Nivix compiler pipeline.
 
-This module takes a novel prompt and asks an LLM to reason about
-what visual primitives are required — completely cold, no templates.
+Uses OpenRouter (single API key) with a free-model auto-fallback chain.
+If Model A fails or is unavailable, it automatically tries Model B, then C, etc.
+Zero cost — all models in the chain are free-tier on OpenRouter.
 
-This is the proof-of-concept that bridges heuristics → real cinematic reasoning.
+Set env variable: OPENROUTER_API_KEY=sk-or-v1-...
 """
 import os
 import json
 import time
 import hashlib
+import urllib.request
+import urllib.error
 
 # Simple file-based cache to avoid re-calling LLM for identical prompts
 CACHE_DIR = os.path.join(os.path.dirname(__file__), ".pass1_cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
+
+# OpenRouter free model fallback chain (tried in order)
+# All are free-tier. If one is overloaded or fails, next is tried automatically.
+FREE_MODEL_CHAIN = [
+    "meta-llama/llama-3.1-8b-instruct:free",
+    "mistralai/mistral-7b-instruct:free",
+    "google/gemma-3-12b-it:free",
+    "microsoft/phi-3-mini-128k-instruct:free",
+    "qwen/qwen-2-7b-instruct:free",
+]
+
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 PASS_1_SYSTEM_PROMPT = """You are the Object Graph Builder for Nivix, an animation compiler.
 Your job is Pass 1 of a multi-pass compilation pipeline.
@@ -61,96 +76,97 @@ def _write_cache(key: str, data: dict):
 
 def run_pass1_nodes(prompt: str) -> dict:
     """
-    Executes Pass 1: LLM-driven Object Graph generation.
-    Returns a dict with 'nodes' (CIR-compliant) and 'reasoning'.
-    Falls back to heuristic templates if API key is unavailable.
+    Executes Pass 1: LLM-driven Object Graph generation via OpenRouter.
+    Automatically tries each free model in FREE_MODEL_CHAIN until one succeeds.
+    Falls back to keyword-aware heuristics only if ALL models fail.
     """
     cache_key = _get_cache_key(prompt)
     cached = _read_cache(cache_key)
     if cached:
-        print(f"[PASS 1] Cache HIT for: '{prompt[:50]}...'")
+        print(f"[PASS 1] Cache HIT for: '{prompt[:50]}'")
         cached["source"] = "cache"
         return cached
 
-    # Try real LLM first
-    api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get("GEMINI_API_KEY")
-    
-    if api_key and api_key.startswith("sk-"):
-        result = _run_openai_pass1(prompt, api_key)
-    elif api_key:
-        result = _run_gemini_pass1(prompt, api_key)
+    api_key = os.environ.get("OPENROUTER_API_KEY")
+
+    if api_key:
+        result = _run_openrouter_pass1(prompt, api_key)
     else:
-        print("[PASS 1] No LLM API key found. Using intelligent heuristic fallback.")
+        print("[PASS 1] No OPENROUTER_API_KEY found. Using heuristic fallback.")
         result = _heuristic_fallback_pass1(prompt)
 
-    # Cache the result (regardless of source)
     _write_cache(cache_key, result)
     return result
 
 
-def _run_openai_pass1(prompt: str, api_key: str) -> dict:
-    """Real OpenAI GPT-4o-mini call for maximum speed + quality."""
-    try:
-        import openai
-        client = openai.OpenAI(api_key=api_key)
-        
-        print(f"[PASS 1] Calling OpenAI GPT-4o-mini for: '{prompt}'")
-        t0 = time.time()
-        
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": PASS_1_SYSTEM_PROMPT},
-                {"role": "user", "content": f"Topic: {prompt}"}
-            ],
-            temperature=0.3,  # Low temp = deterministic schema output
-            max_tokens=800,
-            response_format={"type": "json_object"}
-        )
-        
-        latency_ms = int((time.time() - t0) * 1000)
-        raw = response.choices[0].message.content
-        parsed = json.loads(raw)
-        parsed["source"] = "openai"
-        parsed["latency_ms"] = latency_ms
-        print(f"[PASS 1] OpenAI completed in {latency_ms}ms")
-        return parsed
-        
-    except Exception as e:
-        print(f"[PASS 1] OpenAI failed: {e}. Falling back to heuristics.")
-        return _heuristic_fallback_pass1(prompt)
+def _run_openrouter_pass1(prompt: str, api_key: str) -> dict:
+    """
+    Calls OpenRouter with automatic free-model fallback chain.
+    Tries META Llama → Mistral → Gemma → Phi → Qwen in sequence.
+    All are free-tier. No credit card required.
+    """
+    last_error = None
 
+    for model in FREE_MODEL_CHAIN:
+        try:
+            print(f"[PASS 1] Trying model: {model}")
+            t0 = time.time()
 
-def _run_gemini_pass1(prompt: str, api_key: str) -> dict:
-    """Google Gemini Flash call — fastest and cheapest option."""
-    try:
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        
-        print(f"[PASS 1] Calling Gemini Flash for: '{prompt}'")
-        t0 = time.time()
-        
-        full_prompt = f"{PASS_1_SYSTEM_PROMPT}\n\nTopic: {prompt}"
-        response = model.generate_content(full_prompt)
-        latency_ms = int((time.time() - t0) * 1000)
-        
-        # Strip markdown fences if Gemini wraps JSON in ```
-        raw = response.text.strip()
-        if raw.startswith("```"):
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        
-        parsed = json.loads(raw)
-        parsed["source"] = "gemini"
-        parsed["latency_ms"] = latency_ms
-        print(f"[PASS 1] Gemini completed in {latency_ms}ms")
-        return parsed
-        
-    except Exception as e:
-        print(f"[PASS 1] Gemini failed: {e}. Falling back to heuristics.")
-        return _heuristic_fallback_pass1(prompt)
+            payload = json.dumps({
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": PASS_1_SYSTEM_PROMPT},
+                    {"role": "user", "content": f"Topic: {prompt}"}
+                ],
+                "temperature": 0.3,
+                "max_tokens": 800,
+            }).encode("utf-8")
+
+            req = urllib.request.Request(
+                OPENROUTER_API_URL,
+                data=payload,
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://nivix.onrender.com",
+                    "X-Title": "Nivix Compiler",
+                },
+                method="POST"
+            )
+
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                body = json.loads(resp.read().decode("utf-8"))
+
+            latency_ms = int((time.time() - t0) * 1000)
+            raw = body["choices"][0]["message"]["content"].strip()
+
+            # Strip markdown fences some models add despite instructions
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+            raw = raw.strip()
+
+            parsed = json.loads(raw)
+            parsed["source"] = f"openrouter/{model}"
+            parsed["latency_ms"] = latency_ms
+            print(f"[PASS 1] SUCCESS via {model} in {latency_ms}ms")
+            return parsed
+
+        except urllib.error.HTTPError as e:
+            last_error = f"HTTP {e.code} from {model}"
+            print(f"[PASS 1] {model} returned {e.code}. Trying next model...")
+        except json.JSONDecodeError as e:
+            last_error = f"JSON parse error from {model}: {e}"
+            print(f"[PASS 1] {model} returned invalid JSON. Trying next model...")
+        except Exception as e:
+            last_error = f"{model} failed: {e}"
+            print(f"[PASS 1] {model} failed ({e}). Trying next model...")
+
+    # All models failed — fall to heuristics
+    print(f"[PASS 1] All OpenRouter models failed. Last error: {last_error}")
+    print("[PASS 1] Activating keyword heuristic fallback.")
+    return _heuristic_fallback_pass1(prompt)
 
 
 def _heuristic_fallback_pass1(prompt: str) -> dict:
