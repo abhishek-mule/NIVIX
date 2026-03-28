@@ -234,7 +234,7 @@
              
              jsonDebug.textContent = "Fetching strict CIR from API...";
              try {
-                const response = await fetch("/api/compile", {
+                const response = await fetch("https://nivix.onrender.com/api/compile", {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({ prompt: promptText })
