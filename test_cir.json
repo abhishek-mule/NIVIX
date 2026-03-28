@@ -1,0 +1,22 @@
+{
+  "nodes": [
+    {"id": "a", "type": "shape", "label": "Square", "lifecycle": {"spawn": 0}},
+    {"id": "b", "type": "shape", "label": "Circle", "lifecycle": {"spawn": 30}},
+    {"id": "c", "type": "text", "label": "Hello Nivix", "lifecycle": {"spawn": 60}}
+  ],
+  "transforms": [
+    {"node_id": "a", "action": "move", "start_frame": 30, "end_frame": 90, "params": {"to": {"x": 200, "y": 0}}},
+    {"node_id": "b", "action": "fade_in", "start_frame": 30, "end_frame": 60}
+  ],
+  "constraints": [
+    {"type": "alignment", "nodes": ["a", "b"], "params": {"axis": "horizontal"}}
+  ],
+  "attention": [
+    {"node_id": "a", "focus_score": 1.0, "start_frame": 0, "end_frame": 120, "camera_params": {"zoom": 1.5}}
+  ],
+  "meta": {
+    "prompt": "Test animation",
+    "version": "4.0",
+    "template": "symmetric_compare_v1"
+  }
+}

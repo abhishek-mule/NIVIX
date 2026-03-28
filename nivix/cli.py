@@ -34,6 +34,14 @@ def main():
     explain_parser.add_argument("prompt_file", help="Path to input prompt file")
     explain_parser.add_argument("--visual", action="store_true", help="Generate an interactive HTML visualizer")
 
+    # 6. Render: CIR -> MP4 via Adapter (v4.0)
+    render_parser = subparsers.add_parser("render", help="Render CIR to MP4 using specified adapter")
+    render_parser.add_argument("cir_file", help="Path to input CIR JSON file")
+    render_parser.add_argument("--adapter", "-a", default="shotstack", 
+                               choices=["shotstack", "remotion", "manim"],
+                               help="Renderer adapter (shotstack, remotion, manim)")
+    render_parser.add_argument("--output", "-o", default="output.mp4", help="Output MP4 file path")
+
     args = parser.parse_args()
 
     if args.command == "compile":
@@ -104,7 +112,7 @@ def main():
         .highlight {{ color: #ff7b72; font-weight: bold; }}
         .timeline-bar {{ width: 0%; height: 20px; background: linear-gradient(90deg, #1f6feb, #2ea043); transition: width 2s ease-in-out; border-radius: 4px; }}
         .anim-box {{ width: 50px; height: 50px; background: #238636; border-radius: 5px; position: relative; margin: 20px; text-align: center; line-height: 50px; font-weight: bold; animation: float 3s ease-in-out infinite; }}
-        @keyframes float {{ 0% {{ transform: translateY(0px); }} 50% {{ transform: translateY(-10px); }} 100% {{ transform: translateY(0px); }} }}
+        @keyframes float {{ 0% {{ transform: translateY(0px); }} 50% {{ transform: translateY(-10px); }} 100% {{ transform: translateY(0px); }}
     </style>
 </head>
 <body>
@@ -149,6 +157,41 @@ def main():
             with open(viz_path, "w", encoding="utf-8") as html_file:
                 html_file.write(html_content)
             print(f"Interactive visualizer saved to {viz_path}. Open this file in your browser to inspect the {intent} mappings.")
+
+    elif args.command == "render":
+        print(f"--- [NIVIX CLI] Rendering CIR: {args.cir_file} using {args.adapter} adapter ---")
+        
+        try:
+            with open(args.cir_file, "r") as f:
+                cir_data = json.load(f)
+        except FileNotFoundError:
+            print(f"--- [ERROR] CIR file not found: {args.cir_file} ---")
+            sys.exit(1)
+        except json.JSONDecodeError as e:
+            print(f"--- [ERROR] Invalid JSON in CIR file: {e} ---")
+            sys.exit(1)
+        
+        adapter_name = args.adapter.lower()
+        output_path = args.output
+        
+        if adapter_name == "shotstack":
+            from nivix.core.renderers.shotstack_adapter import ShotstackAdapter
+            adapter = ShotstackAdapter(cir_data)
+            result = adapter.export(cir_data, output_path)
+            print(f"--- [NIVIX CLI] Render complete: {result} ---")
+        elif adapter_name == "remotion":
+            from nivix.core.renderers.remotion_adapter import RemotionAdapter
+            adapter = RemotionAdapter(cir_data)
+            result = adapter.export(cir_data, output_path)
+            print(f"--- [NIVIX CLI] Export configuration ready: {result} ---")
+        elif adapter_name == "manim":
+            from nivix.renderers.manim_adapter.manim_adapter import ManimAdapter
+            adapter = ManimAdapter(cir_data)
+            result = adapter.export()
+            print(f"--- [NIVIX CLI] Render complete: {result} ---")
+        else:
+            print(f"--- [ERROR] Unknown adapter: {adapter_name} ---")
+            sys.exit(1)
     else:
         parser.print_help()
 
