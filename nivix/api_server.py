@@ -1,6 +1,7 @@
 import time
 import json
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 
@@ -13,6 +14,15 @@ except ImportError:
         return True, "Mock validation pass"
 
 app = FastAPI(title="Nivix Rendering & Reasoning API", version="4.0")
+
+# Enable CORS for external frontend consumers (like Vercel UI)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class CompileRequest(BaseModel):
     prompt: str
