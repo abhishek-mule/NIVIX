@@ -13,6 +13,8 @@ except ImportError:
     def validate_cir(data):
         return True, "Mock validation pass"
 
+from core.planner.llm_pass1 import run_pass1_nodes
+
 app = FastAPI(title="Nivix Rendering & Reasoning API", version="4.0")
 
 # Enable CORS for external frontend consumers (like Vercel UI)
@@ -90,24 +92,46 @@ def generate_v4_cir(prompt: str) -> dict:
         })
         
     else:
-        # Default or Compare
-        cir["meta"]["template"] = "symmetric_compare_v1"
-        cir["meta"]["semantic_confidence"] = 0.93
-        cir["nodes"] = [
-            {"id": "obj_a", "type": "object", "label": "Left Item", "lifecycle": {"spawn": 0}},
-            {"id": "obj_b", "type": "object", "label": "Right Item", "lifecycle": {"spawn": 0}}
-        ]
-        cir["constraints"].append({
-            "type": "alignment",
-            "nodes": ["obj_a", "obj_b"],
-            "params": {"axis": "horizontal"}
-        })
-        cir["transforms"].append({
-            "node_id": "obj_a", "action": "move", "start_frame": 0, "end_frame": 30, "easing": "easeOut"
-        })
-        cir["attention"].append({
-            "node_id": "obj_a", "focus_score": 0.5, "start_frame": 0, "end_frame": 30
-        })
+        # 3. Dynamic API Call via Pass 1 (LLM Reasoning)
+        print(f"--- [API] Triggering Dynamic LLM Pass 1 for: '{prompt}' ---")
+        pass1_result = run_pass1_nodes(prompt)
+        nodes = pass1_result.get("nodes", [])
+        
+        cir["meta"]["template"] = f"dynamic_generated (source: {pass1_result.get('source')})"
+        cir["meta"]["semantic_confidence"] = 0.85
+        cir["nodes"] = nodes
+        
+        node_ids = [n["id"] for n in nodes]
+        
+        # Build basic spatial constraint to satisfy schema validation
+        if len(node_ids) > 1:
+            cir["constraints"].append({
+                "type": "alignment",
+                "nodes": node_ids,
+                "params": {"axis": "horizontal"}
+            })
+            
+        # Build sequential timeline transforms based on LLM spawn frames
+        for node in nodes:
+            spawn_frame = node.get("lifecycle", {}).get("spawn", 0)
+            cir["transforms"].append({
+                "node_id": node["id"], 
+                "action": "move", 
+                "start_frame": spawn_frame, 
+                "end_frame": spawn_frame + 30, 
+                "easing": "easeOut",
+                "params": {"target_x": 0, "target_y": 0}
+            })
+            
+        # Add pedagogical attention focus to the first generated node
+        if node_ids:
+            first_spawn = nodes[0].get("lifecycle", {}).get("spawn", 0)
+            cir["attention"].append({
+                "node_id": node_ids[0], 
+                "focus_score": 0.8, 
+                "start_frame": first_spawn, 
+                "end_frame": first_spawn + 60
+            })
 
     return cir
 
