@@ -1,0 +1,32 @@
+[PROMPT]
+highlight the difference between linear and exponential growth
+
+[CIR OUTPUT]
+{
+  "graph_id": "growth_comparison",
+  "intent": "Highlight Difference",
+  "template": "contrast_reveal_v1",
+  "nodes": [
+    {"id": "graph_linear", "type": "plot", "function": "linear"},
+    {"id": "graph_exp", "type": "plot", "function": "exponential"}
+  ],
+  "constraints": ["side_by_side_split", "synced_axes"],
+  "semantic_confidence": 0.88
+}
+
+[TRACE OUTPUT]
+trace 0.0s - Layout solver builds dual 2D axis panels
+trace 0.5s - Render linear function y = x
+trace 0.5s - Render exp function y = 2^x
+trace 3.0s - Apply crossfading divergence marker
+
+[PREVIEW SLICE]
+Preview segment (0-3.5s) successfully generated.
+Output: outputs/preview_highlight_diff_0_3.5.mp4
+Slicing method: Incremental Graph Render
+
+[EXPORTED ANIMATION]
+Final HD Render Complete.
+Duration: 6.5 seconds
+Backend: ManimAdapter
+Output: outputs/highlight_difference_final.mp4

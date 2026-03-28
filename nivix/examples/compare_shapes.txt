@@ -1,23 +1,32 @@
-# Nivix Example: Comparison Reasoning
-# Prompt: Compare a red triangle and a blue square.
+[PROMPT]
+compare triangle and square
 
-### 1. INPUT (prompt)
-"Compare a red triangle and a blue square. Highlight their differences."
+[CIR OUTPUT]
+{
+  "graph_id": "comparison_1",
+  "intent": "Compare",
+  "template": "symmetric_compare_v1",
+  "nodes": [
+    {"id": "obj_triangle", "type": "geometry", "subtype": "triangle", "position": "left"},
+    {"id": "obj_square", "type": "geometry", "subtype": "square", "position": "right"}
+  ],
+  "constraints": ["horizontal_alignment", "equal_scale"],
+  "semantic_confidence": 0.93
+}
 
-### 2. SYMBOLIC ANALYSIS
-- Intent: Compare(RedTriangle, BlueSquare)
-- Template: Symmetric_Comparison_v1
-- Layout Constraint: Horizontal_Alignment (Align axis='horizontal')
-- Attention Gaze: Mirrored_Focus (Triangle focus -> Square focus -> Both)
+[TRACE OUTPUT]
+trace 0.0s - Semantic Planner layout computed (symmetric)
+trace 0.5s - Render Triangle at Left
+trace 0.5s - Render Square at Right
+trace 1.5s - Apply mirrored_focus attention trajectory
 
-### 3. CIR EXPECTATION (v3.9)
-- Spawn(Triangle, color='red')
-- Spawn(Square, color='blue')
-- Align(Triangle, Square, axis='horizontal')
-- Highlight(Triangle, duration=2.0)
-- Highlight(Square, duration=2.0)
-- Compare(Triangle, Square, type='difference')
+[PREVIEW SLICE]
+Preview segment (0-3s) successfully generated.
+Output: outputs/preview_compare_shapes_0_3.mp4
+Slicing method: Incremental Graph Render
 
-### 4. PEDAGOGICAL SCORE
-- Intent Satisfaction: 1.0 (Audit verified)
-- Symmetry Score: 1.0
+[EXPORTED ANIMATION]
+Final HD Render Complete.
+Duration: 5.0 seconds
+Backend: ManimAdapter
+Output: outputs/compare_shapes_final.mp4

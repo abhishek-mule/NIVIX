@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nivix: Cinematic Reasoning Visualizer</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; }
+        .node { fill: #1f6feb; stroke: #58a6ff; stroke-width: 2px; r: 30; }
+        .edge { stroke: #8b949e; stroke-width: 2px; }
+        .panel { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+        h1, h2 { color: #58a6ff; }
+        .highlight { color: #ff7b72; font-weight: bold; }
+        .timeline-bar { width: 0%; height: 20px; background: linear-gradient(90deg, #1f6feb, #2ea043); transition: width 2s ease-in-out; border-radius: 4px; }
+        .anim-box { width: 50px; height: 50px; background: #238636; border-radius: 5px; position: relative; margin: 20px; text-align: center; line-height: 50px; font-weight: bold; animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+    </style>
+</head>
+<body>
+    <h1>🎬 Nivix Graph Visualizer</h1>
+    <div class="panel">
+        <h2>Semantic Discovery</h2>
+        <p>Prompt Target: <span class="highlight">examples\explain_fractions.txt</span></p>
+        <ul>
+            <li><strong>Intent:</strong> Explain Structure</li>
+            <li><strong>Template:</strong> hierarchical_layout_v2</li>
+            <li><strong>Layout Strategy:</strong> vertical_stack_distributed</li>
+            <li><strong>Attention Map:</strong> top_down_sequential</li>
+            <li><strong>Confidence Score:</strong> 0.89</li>
+        </ul>
+    </div>
+    <div class="panel" style="display: flex; gap: 20px;">
+        <div style="flex: 1">
+            <h2>CIR Spatial Mapping</h2>
+            <div style="border:1px dashed #30363d; height: 200px; display:flex; justify-content: center; align-items: center;">
+                <div class="anim-box" style="background:#ff7b72">N1</div>
+                <div class="anim-box" style="background:#1f6feb; border-radius:50%;">N2</div>
+                <div class="anim-box" style="background:#a371f7; transform: rotate(45deg);">N3</div>
+            </div>
+            <p style="text-align:center; color:#8b949e; margin-top:5px; font-size:12px;">Simulated `vertical_stack_distributed` logic over timeline.</p>
+        </div>
+        <div style="flex: 1">
+            <h2>Execution Timeline Trace</h2>
+            <p>Phase 1: Dependency Solve</p>
+            <div class="timeline-bar" style="width: 100%"></div>
+            <p>Phase 2: Semantic Layout Mapping</p>
+            <div class="timeline-bar" style="width: 75%"></div>
+            <p>Phase 3: Attention Trajectory Simulation</p>
+            <div class="timeline-bar" style="width: 45%; background: #d29922"></div>
+        </div>
+    </div>
+    <script>
+        console.log("Nivix interactive tracer loaded.");
+    </script>
+</body>
+</html>

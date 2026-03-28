@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nivix Web-Native Player (CIR v4.0)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { color: #58a6ff; }
+        .player-container {
+            width: 800px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        canvas {
+            width: 100%;
+            height: 450px;
+            background: #010409;
+            display: block;
+        }
+        .controls {
+            padding: 15px;
+            background: #21262d;
+            border-top: 1px solid #30363d;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #2ea043; }
+        input[type="range"] {
+            flex-grow: 1;
+        }
+        .debug-panel {
+            width: 800px;
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+        }
+        .debug-box {
+            flex: 1;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 200px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎬 Nivix Web-Native CIR Player</h1>
+    <p style="color: #8b949e; margin-top: -10px; margin-bottom: 20px;">
+        Consuming Canonical Intermediate Representation (CIR) v4.0 natively via Canvas. Zero Video Dependencies.
+    </p>
+
+    <div class="player-container">
+        <canvas id="nivixCanvas" width="800" height="450"></canvas>
+        <div class="controls">
+            <button id="playBtn">Play</button>
+            <span id="timeDisplay">Frame: 0</span>
+            <input type="range" id="scrubber" min="0" max="150" value="0">
+            <button id="fetchBtn" style="background:#1f6feb;">Fetch Live API</button>
+        </div>
+    </div>
+
+    <div class="debug-panel">
+        <div class="debug-box" id="jsonDebug">Awaiting CIR Payload...</div>
+        <div class="debug-box" id="metaDebug">Awaiting Metadata...</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("nivixCanvas");
+        const ctx = canvas.getContext("2d");
+        const playBtn = document.getElementById("playBtn");
+        const scrubber = document.getElementById("scrubber");
+        const timeDisplay = document.getElementById("timeDisplay");
+        const jsonDebug = document.getElementById("jsonDebug");
+        const metaDebug = document.getElementById("metaDebug");
+        const fetchBtn = document.getElementById("fetchBtn");
+
+        let currentFrame = 0;
+        let isPlaying = false;
+        let animationId;
+        const FPS = 60;
+        const MAX_FRAMES = 150; 
+
+        // Initial Mock CIR v4.0 (Can be overridden by API)
+        let activeCIR = {
+            "nodes": [
+                { "id": "obj_a", "type": "object", "label": "Triangle", "lifecycle": { "spawn": 0 } },
+                { "id": "obj_b", "type": "object", "label": "Square", "lifecycle": { "spawn": 10 } }
+            ],
+            "transforms": [
+                { "node_id": "obj_a", "action": "move", "start_frame": 0, "end_frame": 60, "easing": "easeOut", "params": {"target_x": 200, "target_y": 225} },
+                { "node_id": "obj_b", "action": "move", "start_frame": 10, "end_frame": 70, "easing": "easeOut", "params": {"target_x": 600, "target_y": 225} }
+            ],
+            "constraints": [
+                { "type": "alignment", "nodes": ["obj_a", "obj_b"], "params": {"axis": "horizontal"} }
+            ],
+            "attention": [
+                { "node_id": "obj_a", "focus_score": 1.0, "start_frame": 0, "end_frame": 45 },
+                { "node_id": "obj_b", "focus_score": 1.0, "start_frame": 45, "end_frame": 90 }
+            ],
+            "meta": { "version": "4.0", "template": "symmetric_compare_v1", "semantic_confidence": 0.93 }
+        };
+
+        function updateDebug() {
+            jsonDebug.textContent = JSON.stringify(activeCIR, null, 2);
+            let metaHtml = `Version: ${activeCIR.meta.version}\n`;
+            metaHtml += `Template: ${activeCIR.meta.template}\n`;
+            metaHtml += `Confidence: ${activeCIR.meta.semantic_confidence}\n\n`;
+            metaHtml += `Nodes Loaded: ${activeCIR.nodes.length}\n`;
+            metaHtml += `Transforms Scheduled: ${activeCIR.transforms.length}\n`;
+            metaHtml += `Attention Focus Points: ${activeCIR.attention.length}`;
+            metaDebug.textContent = metaHtml;
+        }
+
+        function renderFrame(frame) {
+            // Clear screen
+            ctx.fillStyle = "#010409";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Basic Interpolation Logic based on CIR temporal transforms
+            activeCIR.nodes.forEach(node => {
+                let x = canvas.width / 2; // Default start
+                let y = -100; // start offscreen
+                let opacity = 1.0;
+                let color = node.id === "obj_b" ? "#ff7b72" : "#58a6ff";
+                
+                // Spawn lifecycle check
+                if (frame < (node.lifecycle.spawn || 0)) return;
+
+                // Simple simulated state machine based on transforms
+                const moveTransform = activeCIR.transforms.find(t => t.node_id === node.id && t.action === "move");
+                if (moveTransform) {
+                    const progress = Math.min(Math.max((frame - moveTransform.start_frame) / (moveTransform.end_frame - moveTransform.start_frame), 0), 1);
+                    x = 400 + (moveTransform.params.target_x - 400) * progress; // interpolate from center
+                    y = moveTransform.params.target_y * Math.min(progress * 1.5, 1); // drop in effect
+                } else {
+                    // Static fallback
+                    x = node.id === "obj_b" ? 600 : 200;
+                    y = 225;
+                }
+
+                // Attention/Focus Highlight
+                const isFocused = activeCIR.attention.some(a => a.node_id === node.id && frame >= a.start_frame && frame <= a.end_frame);
+                
+                if (isFocused) {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 65, 0, Math.PI * 2);
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+                    ctx.fill();
+                    ctx.strokeStyle = "#f0f6fc";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+
+                // Draw Node
+                ctx.beginPath();
+                ctx.arc(x, y, 40, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+
+                // Draw Label
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "16px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(node.label || node.id, x, y + 5);
+            });
+        }
+
+        function tick() {
+            if (!isPlaying) return;
+            currentFrame++;
+            if (currentFrame > MAX_FRAMES) {
+                isPlaying = false;
+                playBtn.textContent = "Play";
+                return;
+            }
+            scrubber.value = currentFrame;
+            timeDisplay.textContent = `Frame: ${currentFrame}`;
+            renderFrame(currentFrame);
+            setTimeout(() => { animationId = requestAnimationFrame(tick); }, 1000/FPS);
+        }
+
+        playBtn.addEventListener("click", () => {
+            if (isPlaying) {
+                isPlaying = false;
+                playBtn.textContent = "Play";
+                cancelAnimationFrame(animationId);
+            } else {
+                if (currentFrame >= MAX_FRAMES) currentFrame = 0;
+                isPlaying = true;
+                playBtn.textContent = "Pause";
+                tick();
+            }
+        });
+
+        scrubber.addEventListener("input", (e) => {
+            currentFrame = parseInt(e.target.value);
+            timeDisplay.textContent = `Frame: ${currentFrame}`;
+            renderFrame(currentFrame);
+        });
+
+        fetchBtn.addEventListener("click", async () => {
+             // Mocking an API call to localhost:8000/api/compile
+             const promptText = prompt("Enter a prompt (e.g. 'compare two concepts' or 'explain fraction'):", "explain fraction");
+             if(!promptText) return;
+             
+             jsonDebug.textContent = "Fetching strict CIR from API...";
+             try {
+                const response = await fetch("/api/compile", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ prompt: promptText })
+                });
+                if(response.ok) {
+                    const data = await response.json();
+                    activeCIR = data.cir; // Load new CIR
+                    currentFrame = 0;
+                    scrubber.value = 0;
+                    updateDebug();
+                    renderFrame(0);
+                    alert("✅ Successfully loaded and verified V4.0 CIR from API!");
+                } else {
+                    const err = await response.json();
+                    alert("❌ Validation Failed: " + JSON.stringify(err));
+                }
+             } catch(e) {
+                alert("API Server unreachable. Please run 'python api_server.py' in the background.");
+             }
+        });
+
+        // Init
+        updateDebug();
+        renderFrame(0);
+    </script>
+</body>
+</html>

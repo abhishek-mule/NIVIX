@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Nivix Canonical Intermediate Representation (CIR) v4.0",
+  "type": "object",
+  "required": ["nodes", "transforms", "constraints", "meta"],
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "description": "The objects and semantic entities in the scene.",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": { "type": "string", "description": "Unique identifier for the node" },
+          "type": {
+            "type": "string",
+            "enum": ["object", "group", "text", "shape", "highlight", "plot", "math"],
+            "description": "The semantic primitive type"
+          },
+          "label": { "type": "string" },
+          "metadata": { "type": "object" },
+          "lifecycle": {
+            "type": "object",
+            "properties": {
+              "spawn": { "type": "number", "minimum": 0 },
+              "destroy": { "type": "number", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "transforms": {
+      "type": "array",
+      "description": "State changes affecting the nodes over time.",
+      "items": {
+        "type": "object",
+        "required": ["node_id", "action", "start_frame"],
+        "properties": {
+          "node_id": { "type": "string" },
+          "action": {
+            "type": "string",
+            "enum": ["move", "fade_in", "fade_out", "scale", "morph", "distribute", "align", "rotate", "draw"]
+          },
+          "params": { "type": "object" },
+          "start_frame": { "type": "number", "minimum": 0 },
+          "end_frame": { "type": "number", "minimum": 0 },
+          "easing": {
+            "type": "string",
+            "enum": ["linear", "easeInOut", "easeIn", "easeOut", "bounce", "elastic"]
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "description": "Semantic layout constraints solved by the planner.",
+      "items": {
+        "type": "object",
+        "required": ["type", "nodes"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["spatial", "hierarchical", "relative", "alignment"]
+          },
+          "nodes": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "params": { "type": "object" }
+        }
+      }
+    },
+    "attention": {
+      "type": "array",
+      "description": "Camera and focus operations over the timeline.",
+      "items": {
+        "type": "object",
+        "required": ["start_frame", "end_frame"],
+        "properties": {
+          "node_id": { "type": "string" },
+          "focus_score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "start_frame": { "type": "number", "minimum": 0 },
+          "end_frame": { "type": "number", "minimum": 0 },
+          "camera_params": {
+            "type": "object",
+            "properties": {
+              "zoom": { "type": "number" },
+              "pan": {
+                "type": "array",
+                "items": { "type": "number" },
+                "minItems": 2,
+                "maxItems": 2
+              }
+            }
+          }
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "required": ["prompt", "version"],
+      "properties": {
+        "prompt": { "type": "string" },
+        "template": { "type": "string" },
+        "semantic_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "generated_at": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+[PROMPT]
+derive the area of a circle
+
+[CIR OUTPUT]
+{
+  "graph_id": "area_derivation",
+  "intent": "Derive Formula",
+  "template": "geometric_unroll_v1",
+  "nodes": [
+    {"id": "circle_shape", "type": "geometry", "subtype": "circle"},
+    {"id": "unrolled_rect", "type": "geometry", "subtype": "rectangle"}
+  ],
+  "constraints": ["radial_to_linear_transform"],
+  "semantic_confidence": 0.91
+}
+
+[TRACE OUTPUT]
+trace 0.0s - Identify formula to derive [A = πr^2]
+trace 1.0s - Construct circle with concentric rings
+trace 2.5s - Animate linear unrolling mapping to rectangle
+trace 4.0s - Render formulation equation text
+
+[PREVIEW SLICE]
+Preview segment (0-4s) successfully generated.
+Output: outputs/preview_derive_area_0_4.mp4
+Slicing method: Incremental Graph Render
+
+[EXPORTED ANIMATION]
+Final HD Render Complete.
+Duration: 8.5 seconds
+Backend: ManimAdapter
+Output: outputs/derive_area_circle_final.mp4

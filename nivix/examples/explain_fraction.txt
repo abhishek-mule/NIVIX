@@ -1,0 +1,34 @@
+[PROMPT]
+explain numerator and denominator
+
+[CIR OUTPUT]
+{
+  "graph_id": "fraction_explainer",
+  "intent": "Explain Structure",
+  "template": "hierarchical_layout_v2",
+  "nodes": [
+    {"id": "numerator", "type": "text", "role": "top_element"},
+    {"id": "vinculum", "type": "geometry", "role": "divider"},
+    {"id": "denominator", "type": "text", "role": "bottom_element"}
+  ],
+  "constraints": ["vertical_stack_distributed", "center_x_axis"],
+  "semantic_confidence": 0.89
+}
+
+[TRACE OUTPUT]
+trace 0.0s - Layout solver assigns hierarchical zones
+trace 0.5s - Render Numerator
+trace 1.0s - Render Vinculum
+trace 1.5s - Render Denominator
+trace 2.5s - Apply top_down_sequential attention path
+
+[PREVIEW SLICE]
+Preview segment (0-3s) successfully generated.
+Output: outputs/preview_explain_fraction_0_3.mp4
+Slicing method: Incremental Graph Render
+
+[EXPORTED ANIMATION]
+Final HD Render Complete.
+Duration: 6.0 seconds
+Backend: ManimAdapter
+Output: outputs/explain_fraction_final.mp4
