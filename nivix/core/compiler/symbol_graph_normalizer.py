@@ -82,15 +82,19 @@ class SymbolGraphNormalizer:
         )
         
         if label:
-            if "^" in label:
+            if "+" in label or (label.count("-") > 0 and not label.startswith("-")):
+                sym.symbol_type = SymbolType.EXPRESSION
+                sym.properties["operator"] = self._detect_operator(label)
+            
+            elif "^" in label:
                 parts = label.split("^")
                 sym.base = parts[0]
                 sym.exponent = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else parts[1]
                 sym.properties["degree"] = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 1
             
-            elif any(op in label for op in ["+", "-", "*", "/"]):
-                sym.symbol_type = SymbolType.EXPRESSION
-                sym.properties["operator"] = self._detect_operator(label)
+            elif "*" in label:
+                sym.symbol_type = SymbolType.TERM
+                sym.properties["coefficient"] = self._extract_coefficient(label)
         
         self.symbols[node_id] = sym
     
