@@ -1,0 +1,69 @@
+{
+  "version": "4.0",
+  "expression": "(a+b)^2",
+  "rewritten": "a^2 + 2ab + b^2",
+  "nodes": [
+    {
+      "id": "a_squared",
+      "type": "math",
+      "label": "a\u00b2",
+      "visual": {"color": "#4A90D9", "position": [0, 0]},
+      "lifecycle": {"spawn": 0}
+    },
+    {
+      "id": "plus_1",
+      "type": "text",
+      "label": "+",
+      "visual": {"color": "#FFFFFF", "position": [1, 0]},
+      "lifecycle": {"spawn": 25}
+    },
+    {
+      "id": "cross_term",
+      "type": "math",
+      "label": "2ab",
+      "visual": {"color": "#F59E0B", "position": [2, 0]},
+      "lifecycle": {"spawn": 50}
+    },
+    {
+      "id": "plus_2",
+      "type": "text",
+      "label": "+",
+      "visual": {"color": "#FFFFFF", "position": [3, 0]},
+      "lifecycle": {"spawn": 75}
+    },
+    {
+      "id": "b_squared",
+      "type": "math",
+      "label": "b\u00b2",
+      "visual": {"color": "#22C55E", "position": [4, 0]},
+      "lifecycle": {"spawn": 100}
+    }
+  ],
+  "constraints": [
+    {
+      "type": "alignment",
+      "nodes": ["a_squared", "plus_1", "cross_term", "plus_2", "b_squared"],
+      "params": {"axis": "horizontal", "spacing": 1.5}
+    }
+  ],
+  "transforms": [
+    {"node_id": "a_squared", "action": "fade_in", "start_frame": 0, "end_frame": 20, "easing": "easeOut"},
+    {"node_id": "plus_1", "action": "fade_in", "start_frame": 25, "end_frame": 40, "easing": "easeOut"},
+    {"node_id": "cross_term", "action": "fade_in", "start_frame": 50, "end_frame": 65, "easing": "easeOut"},
+    {"node_id": "plus_2", "action": "fade_in", "start_frame": 75, "end_frame": 90, "easing": "easeOut"},
+    {"node_id": "b_squared", "action": "fade_in", "start_frame": 100, "end_frame": 115, "easing": "easeOut"}
+  ],
+  "attention": [
+    {"node_id": "cross_term", "focus_score": 1.0, "start_frame": 50, "end_frame": 100}
+  ],
+  "timeline": {
+    "total_frames": 150,
+    "fps": 30,
+    "duration_s": 5.0
+  },
+  "meta": {
+    "template": "algebraic_expansion_v1",
+    "semantic_confidence": 0.95,
+    "source": "symbolic_parser"
+  }
+}

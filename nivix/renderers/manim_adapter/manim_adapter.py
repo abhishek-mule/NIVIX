@@ -97,12 +97,26 @@ class ManimAdapter:
         
         print("--- [NIVIX MANIM] Script Generated. Executing FFmpeg Render... ---")
         try:
-            # Call Manim CLI: manim -qh temp_manim_scene.py NivixScene
-            # Commenting out actual subprocess execution so it doesn't break in environments without Manim
-            # subprocess.run(["manim", "-qh", self.script_path, "NivixScene"], check=True)
-            print("--- [NIVIX MANIM] Render Complete (Simulated for Demo) ---")
-            print(f"Output saved to: {self.output_dir}NivixScene.mp4")
-            return f"{self.output_dir}NivixScene.mp4"
+            result = subprocess.run(
+                ["manim", "render", "-ql", self.script_path, "NivixScene"],
+                capture_output=True,
+                text=True,
+                timeout=120
+            )
+            if result.returncode != 0:
+                print(f"--- [MANIM ERROR] {result.stderr} ---")
+                return None
+            print("--- [NIVIX MANIM] Render Complete ---")
+            output_file = self.output_dir + "NivixScene.mp4"
+            if os.path.exists(output_file):
+                return output_file
+            return "media/video.mp4"
+        except FileNotFoundError:
+            print("--- [MANIM] Manim not installed. Run: pip install manim ---")
+            return None
+        except subprocess.TimeoutExpired:
+            print("--- [MANIM] Render timeout ---")
+            return None
         except Exception as e:
             print(f"--- [NIVIX MANIM ERROR] {e} ---")
             return None

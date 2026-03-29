@@ -14,6 +14,104 @@ except ImportError:
         return True, "Mock validation pass"
 
 from nivix.core.planner.llm_pass1 import run_pass1_nodes
+import re
+
+def parse_expression(expr: str) -> dict:
+    """Parse math expression and generate CIR nodes for visual expansion."""
+    expr = expr.strip()
+    
+    cir = {
+        "nodes": [],
+        "transforms": [],
+        "constraints": [],
+        "attention": [],
+        "meta": {
+            "prompt": expr,
+            "version": "4.0",
+            "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "semantic_confidence": 0.95,
+            "template": "algebraic_expansion_v1"
+        }
+    }
+    
+    expanded = None
+    
+    # Pattern: (a+b)^2 -> a^2 + 2ab + b^2
+    match = re.match(r"\(([a-z]+)\+([a-z]+)\)\^(\d+)", expr)
+    if match:
+        a, b, power = match.groups()
+        a, b = a.strip(), b.strip()
+        power = int(power)
+        
+        if power == 2:
+            expanded = f"{a}^2 + 2{a}{b} + {b}^2"
+            
+            # Generate nodes for: a^2, +, 2ab, +, b^2
+            cir["nodes"] = [
+                {"id": "a_squared", "type": "math", "label": f"{a}\u00b2", "lifecycle": {"spawn": 0}},
+                {"id": "plus_1", "type": "text", "label": "+", "lifecycle": {"spawn": 25}},
+                {"id": "cross_term", "type": "math", "label": f"2{a}{b}", "lifecycle": {"spawn": 50}},
+                {"id": "plus_2", "type": "text", "label": "+", "lifecycle": {"spawn": 75}},
+                {"id": "b_squared", "type": "math", "label": f"{b}\u00b2", "lifecycle": {"spawn": 100}}
+            ]
+            
+            # Horizontal alignment constraint
+            cir["constraints"] = [
+                {"type": "alignment", "nodes": ["a_squared", "plus_1", "cross_term", "plus_2", "b_squared"], 
+                 "params": {"axis": "horizontal"}}
+            ]
+            
+            # Spawn animations
+            for node in cir["nodes"]:
+                cir["transforms"].append({
+                    "node_id": node["id"], "action": "fade_in", 
+                    "start_frame": node["lifecycle"]["spawn"], 
+                    "end_frame": node["lifecycle"]["spawn"] + 20,
+                    "easing": "easeOut"
+                })
+            
+            # Focus on cross term (the key insight)
+            cir["attention"] = [
+                {"node_id": "cross_term", "focus_score": 1.0, "start_frame": 50, "end_frame": 100}
+            ]
+            
+    # Pattern: (a+b+c)^2
+    match = re.match(r"\(([a-z]+)\+([a-z]+)\+([a-z]+)\)\^(\d+)", expr)
+    if match:
+        a, b, c, power = match.groups()
+        power = int(power)
+        
+        if power == 2:
+            expanded = f"{a}^2 + {b}^2 + {c}^2 + 2{a}{b} + 2{b}{c} + 2{a}{c}"
+            
+            cir["nodes"] = [
+                {"id": "a_sq", "type": "math", "label": f"{a}\u00b2", "lifecycle": {"spawn": 0}},
+                {"id": "b_sq", "type": "math", "label": f"{b}\u00b2", "lifecycle": {"spawn": 20}},
+                {"id": "c_sq", "type": "math", "label": f"{c}\u00b2", "lifecycle": {"spawn": 40}},
+                {"id": "ab", "type": "math", "label": f"2{a}{b}", "lifecycle": {"spawn": 60}},
+                {"id": "bc", "type": "math", "label": f"2{b}{c}", "lifecycle": {"spawn": 80}},
+                {"id": "ac", "type": "math", "label": f"2{a}{c}", "lifecycle": {"spawn": 100}}
+            ]
+            
+            cir["constraints"] = [
+                {"type": "alignment", "nodes": [n["id"] for n in cir["nodes"]], 
+                 "params": {"axis": "horizontal"}}
+            ]
+            
+            for node in cir["nodes"]:
+                cir["transforms"].append({
+                    "node_id": node["id"], "action": "fade_in", 
+                    "start_frame": node["lifecycle"]["spawn"], 
+                    "end_frame": node["lifecycle"]["spawn"] + 15,
+                    "easing": "easeOut"
+                })
+    
+    if not expanded:
+        # Fallback to prompt-based for backwards compatibility
+        return generate_v4_cir(f"expand {expr}")
+    
+    cir["meta"]["rewritten"] = expanded
+    return cir
 
 app = FastAPI(title="Nivix Rendering & Reasoning API", version="4.0")
 
@@ -27,7 +125,8 @@ app.add_middleware(
 )
 
 class CompileRequest(BaseModel):
-    prompt: str
+    prompt: str = None
+    expression: str = None
 
 def generate_v4_cir(prompt: str) -> dict:
     """
@@ -140,12 +239,15 @@ def generate_v4_cir(prompt: str) -> dict:
 async def compile_endpoint(request: CompileRequest):
     """
     Main Compilation Endpoint.
-    Consumes a prompt, generates Execution Graph (CIR), validates against strict Schema.
+    Consumes a prompt OR expression, generates Execution Graph (CIR), validates against strict Schema.
     """
-    print(f"--- [API] Received Synthesis Request: '{request.prompt}' ---")
-    
-    # 1. Generate execution graph
-    cir = generate_v4_cir(request.prompt)
+    # Handle expression input
+    if request.expression:
+        print(f"--- [API] Received Expression: '{request.expression}' ---")
+        cir = parse_expression(request.expression)
+    else:
+        print(f"--- [API] Received Prompt: '{request.prompt}' ---")
+        cir = generate_v4_cir(request.prompt)
     
     # 2. Strict Schema Validation
     is_valid, error_msg = validate_cir(cir)
