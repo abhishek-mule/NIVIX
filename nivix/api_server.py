@@ -1,21 +1,9 @@
 import time
 import json
-import os
-import hashlib
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import uvicorn
-
-# Render output directory
-RENDER_DIR = os.path.join(os.path.dirname(__file__), "renders")
-os.makedirs(RENDER_DIR, exist_ok=True)
-
-def compute_render_hash(content: str, target: str) -> str:
-    """Deterministic hash from content + target - same input = same hash."""
-    data = f"{content}:{target}"
-    return hashlib.sha256(data.encode()).hexdigest()[:12]
 
 # Import the new strict v4.0 CIR Validator
 try:
@@ -204,8 +192,13 @@ def generate_v4_cir(prompt: str) -> dict:
         
     else:
         # 3. Dynamic API Call via Pass 1 (LLM Reasoning)
-        print(f"--- [API] Triggering Dynamic LLM Pass 1 for: '{prompt}' ---")
+        import os
+        api_key = os.environ.get("OPENROUTER_API_KEY")
+        print(f"--- [API] API Key Present: {bool(api_key)} ---")
+        print(f"--- [API] Key Prefix: {api_key[:15] if api_key else 'NONE'} ---")
+        print(f"--- [API] Triggering LLM for: '{prompt}' ---")
         pass1_result = run_pass1_nodes(prompt)
+        print(f"--- [API] LLM Source: {pass1_result.get('source')} ---")
         nodes = pass1_result.get("nodes", [])
         
         cir["meta"]["template"] = f"dynamic_generated (source: {pass1_result.get('source')})"
@@ -287,76 +280,6 @@ async def compile_endpoint(request: CompileRequest):
         }
     }
 
-
-@app.post("/api/render")
-async def render_endpoint(body: dict):
-    """
-    Render CIR to video format.
-    Returns video_url for deterministic output.
-    """
-    content = (
-        body.get("expression") or 
-        body.get("prompt") or 
-        body.get("text") or 
-        body.get("query") or
-        ""
-    )
-    target = body.get("target", "mp4")
-    
-    if not content or not content.strip():
-        raise HTTPException(status_code=400, detail={"error": "Content required"})
-    
-    # Compute deterministic hash
-    render_hash = compute_render_hash(content, target)
-    video_filename = f"{render_hash}.{target}"
-    video_path = os.path.join(RENDER_DIR, video_filename)
-    video_url = f"/renders/{video_filename}"
-    
-    # Generate CIR
-    if re.match(r"^\([a-z]\+[a-z]", content, re.IGNORECASE):
-        cir = parse_expression(content)
-    else:
-        cir = generate_v4_cir(content)
-    
-    is_valid, error_msg = validate_cir(cir)
-    if not is_valid:
-        raise HTTPException(status_code=400, detail={"error": "Validation failed"})
-    
-    # Check if already rendered (deterministic caching)
-    if os.path.exists(video_path):
-        existing = True
-    else:
-        # Render new video using Manim adapter
-        try:
-            from nivix.renderers.manim_adapter import ManimAdapter
-            adapter = ManimAdapter(cir)
-            output_path = adapter.export()
-            existing = False
-        except ImportError:
-            output_path = None
-        except Exception as e:
-            output_path = None
-    
-    return {
-        "status": "success",
-        "cir": cir,
-        "render": {
-            "hash": render_hash,
-            "adapter": "manim",
-            "video_url": video_url if os.path.exists(video_path) else None,
-            "format": target,
-            "cached": existing if os.path.exists(video_path) else False,
-            "message": "Render complete" if os.path.exists(video_path) else "Install manim locally for video"
-        }
-    }
-
-
-# Mount static files for rendered videos
-if os.path.exists(RENDER_DIR):
-    app.mount("/renders", StaticFiles(directory=RENDER_DIR), name="renders")
-
-
 if __name__ == "__main__":
     print("--- Booting Nivix Schema-Aware Operations API v4.0 ---")
-    print(f"Renders directory: {RENDER_DIR}")
     uvicorn.run(app, host="0.0.0.0", port=8000)
