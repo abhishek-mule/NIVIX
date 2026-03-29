@@ -194,11 +194,13 @@ def generate_v4_cir(prompt: str) -> dict:
         # 3. Dynamic API Call via Pass 1 (LLM Reasoning)
         import os
         api_key = os.environ.get("OPENROUTER_API_KEY")
-        print(f"--- [API] API Key Present: {bool(api_key)} ---")
-        print(f"--- [API] Key Prefix: {api_key[:15] if api_key else 'NONE'} ---")
-        print(f"--- [API] Triggering LLM for: '{prompt}' ---")
+        has_key = bool(api_key)
+        key_prefix = api_key[:15] if api_key else "NONE"
+        print(f"=== [API] DEBUG: has_key={has_key}, prefix={key_prefix} ===")
+        print(f"=== [API] DEBUG: Calling run_pass1_nodes for: {prompt} ===")
         pass1_result = run_pass1_nodes(prompt)
-        print(f"--- [API] LLM Source: {pass1_result.get('source')} ---")
+        source = pass1_result.get("source", "unknown")
+        print(f"=== [API] DEBUG: source={source} ===")
         nodes = pass1_result.get("nodes", [])
         
         cir["meta"]["template"] = f"dynamic_generated (source: {pass1_result.get('source')})"
