@@ -125,11 +125,11 @@ app.add_middleware(
 )
 
 class CompileRequest(BaseModel):
-    prompt: str = ""
-    expression: str = ""
-    text: str = ""
-    query: str = ""
-    query_str: str = ""
+    prompt: str | None = None
+    expression: str | None = None
+    text: str | None = None
+    query: str | None = None
+    input: str | None = None
     
     def get_content(self) -> str:
         """Get content from any available field."""
@@ -138,7 +138,8 @@ class CompileRequest(BaseModel):
             self.prompt or 
             self.text or 
             self.query or 
-            self.query_str
+            self.input or
+            ""
         )
 
 def generate_v4_cir(prompt: str) -> dict:
