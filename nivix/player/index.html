@@ -4,192 +4,298 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nivix — Cinematic Reasoning Engine</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #070b14;
-      --surface: #0d1628;
-      --surface2: #111d35;
-      --border: rgba(99,155,255,0.12);
-      --border-glow: rgba(99,155,255,0.35);
-      --accent: #4f8fff;
-      --accent2: #7c3aed;
+      --bg: #060810;
+      --surface: #0c1424;
+      --surface-raised: #131d30;
+      --border: #1e2a42;
+      --border-focus: #3b82f6;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
       --success: #22c55e;
       --warning: #f59e0b;
       --error: #ef4444;
-      --text: #e2e8f0;
+      --text: #e8ecf4;
+      --text-secondary: #94a3b8;
       --text-muted: #64748b;
-      --text-dim: #94a3b8;
+      --radius: 8px;
+      --radius-lg: 12px;
     }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow-x: hidden;
     }
 
-    /* Ambient glow bg */
-    body::before {
-      content: '';
-      position: fixed;
-      top: -30%;
-      left: -10%;
-      width: 60%;
-      height: 60%;
-      background: radial-gradient(circle, rgba(79,143,255,0.07) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
+    /* Skip Link for Accessibility */
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: 16px;
+      background: var(--accent);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      z-index: 9999;
+      text-decoration: none;
+      font-weight: 600;
     }
-    body::after {
-      content: '';
-      position: fixed;
-      bottom: -20%;
-      right: -10%;
-      width: 50%;
-      height: 50%;
-      background: radial-gradient(circle, rgba(124,58,237,0.06) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
+    .skip-link:focus {
+      top: 16px;
     }
 
-    /* ─── HEADER ─── */
-    header {
+    /* Progress Bar */
+    .workflow-progress {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+    }
+    .progress-track {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .progress-step {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       position: relative;
-      z-index: 10;
+    }
+    .progress-step:not(:last-child)::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background: var(--border);
+      margin: 0 8px;
+    }
+    .progress-step.completed:not(:last-child)::after {
+      background: var(--success);
+    }
+    .step-indicator {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface-raised);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+    .step-indicator.active {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+      animation: pulse 1.5s infinite;
+    }
+    .step-indicator.completed {
+      border-color: var(--success);
+      background: var(--success);
+      color: #fff;
+    }
+    .step-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .step-label.active { color: var(--text); }
+    .step-label.completed { color: var(--success); }
+    .progress-percentage {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      min-width: 48px;
+      text-align: right;
+    }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+    /* Header */
+    header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 18px 32px;
+      padding: 14px 24px;
       border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(20px);
-      background: rgba(7,11,20,0.8);
+      background: var(--surface);
     }
     .logo {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.3px;
     }
     .logo-icon {
-      width: 34px; height: 34px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
     }
-    .logo-tag {
+    .version-badge {
       font-size: 11px;
       font-weight: 500;
       color: var(--accent);
-      background: rgba(79,143,255,0.1);
-      border: 1px solid rgba(79,143,255,0.2);
-      padding: 2px 8px;
+      background: rgba(59,130,246,0.15);
+      border: 1px solid rgba(59,130,246,0.25);
+      padding: 3px 10px;
       border-radius: 20px;
-      letter-spacing: 0.5px;
     }
 
-    /* API Status Pill */
+    /* API Status - Enhanced with health/response time */
     .api-status {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       font-size: 13px;
-      font-weight: 500;
-      padding: 6px 14px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      transition: all 0.3s ease;
-      cursor: default;
     }
-    .api-status .dot {
-      width: 8px; height: 8px;
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface-raised);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--text-muted);
-      transition: background 0.3s ease;
     }
-    .api-status.checking .dot { background: var(--warning); animation: pulse 1.2s infinite; }
-    .api-status.online .dot { background: var(--success); box-shadow: 0 0 8px var(--success); }
-    .api-status.offline .dot { background: var(--error); }
+    .status-indicator.online .status-dot {
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+    .status-indicator.offline .status-dot {
+      background: var(--error);
+    }
+    .status-indicator.connecting .status-dot {
+      background: var(--warning);
+      animation: pulse 1s infinite;
+    }
+    .status-text {
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .status-latency {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 4px 8px;
+      background: var(--surface);
+      border-radius: 4px;
+    }
 
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-    /* ─── LAYOUT ─── */
+    /* Main Layout */
     .app {
-      position: relative;
-      z-index: 1;
       display: grid;
-      grid-template-columns: 380px 1fr;
-      gap: 0;
+      grid-template-columns: 400px 1fr;
       flex: 1;
-      height: calc(100vh - 65px);
+      overflow: hidden;
     }
 
-    /* ─── SIDEBAR ─── */
-    .sidebar {
+    /* Input Panel */
+    .input-panel {
+      background: var(--surface);
       border-right: 1px solid var(--border);
       display: flex;
       flex-direction: column;
       overflow-y: auto;
-      background: rgba(13,22,40,0.6);
-      backdrop-filter: blur(10px);
     }
-
-    .sidebar-section {
-      padding: 20px 22px;
+    .panel-section {
+      padding: 20px;
       border-bottom: 1px solid var(--border);
     }
-    .section-label {
-      font-size: 10px;
+    .section-title {
+      font-size: 11px;
       font-weight: 600;
-      letter-spacing: 1.2px;
       text-transform: uppercase;
+      letter-spacing: 1px;
       color: var(--text-muted);
       margin-bottom: 12px;
     }
 
-    /* Prompt box */
-    .prompt-wrapper {
-      position: relative;
+    /* Prompt Area - Clean like Gemini */
+    .prompt-area {
+      padding: 20px;
     }
-    textarea#promptInput {
+    .prompt-label {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .prompt-textarea {
       width: 100%;
-      background: var(--surface2);
+      min-height: 120px;
+      background: var(--surface-raised);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: var(--radius-lg);
       color: var(--text);
-      font-family: 'Inter', sans-serif;
+      font-family: inherit;
       font-size: 14px;
       line-height: 1.6;
-      padding: 12px 14px;
-      resize: none;
-      height: 110px;
+      padding: 14px;
+      resize: vertical;
       outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    textarea#promptInput:focus {
-      border-color: var(--border-glow);
-      box-shadow: 0 0 0 3px rgba(79,143,255,0.1);
+    .prompt-textarea:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
     }
-    textarea#promptInput::placeholder { color: var(--text-muted); }
+    .prompt-textarea::placeholder {
+      color: var(--text-muted);
+    }
+    .prompt-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .prompt-hint kbd {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: var(--surface-raised);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
 
-    .compile-btn {
-      margin-top: 10px;
-      width: 100%;
-      padding: 11px 0;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
+    /* Submit Button */
+    .submit-btn {
+      margin: 0 20px;
+      padding: 14px 0;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
       border: none;
-      border-radius: 10px;
+      border-radius: var(--radius-lg);
       color: #fff;
-      font-family: 'Inter', sans-serif;
+      font-family: inherit;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
@@ -199,74 +305,301 @@
       gap: 8px;
       transition: opacity 0.2s, transform 0.15s;
     }
-    .compile-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-    .compile-btn:active { transform: translateY(0); }
-    .compile-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .submit-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+    .submit-btn:active:not(:disabled) { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Model Select */
-    select#modelSelect {
-      width: 100%;
-      background: var(--surface2);
+    /* Model Info - LLM Transparency */
+    .model-info {
+      padding: 20px;
+    }
+    .model-card {
+      background: var(--surface-raised);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: var(--radius-lg);
+      padding: 14px;
+    }
+    .model-name {
+      font-size: 14px;
+      font-weight: 600;
       color: var(--text);
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      padding: 9px 12px;
-      outline: none;
-      cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      transition: border-color 0.2s;
+      margin-bottom: 4px;
     }
-    select#modelSelect:focus { border-color: var(--border-glow); }
-    select#modelSelect option { background: #0d1628; }
+    .model-source {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .model-params {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    .param {
+      font-size: 11px;
+    }
+    .param-label { color: var(--text-muted); }
+    .param-value { font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
 
-    /* Meta Panel */
-    .meta-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    .meta-card {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-    }
-    .meta-card .mc-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.8px; }
-    .meta-card .mc-value { font-size: 15px; font-weight: 600; color: var(--text); font-family: 'JetBrains Mono', monospace; }
-    .meta-card .mc-value.good { color: var(--success); }
-    .meta-card .mc-value.warn { color: var(--warning); }
-
-    /* JSON Inspector */
-    .json-inspector {
+    /* Results Section */
+    .results-section {
       flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: none;
+    }
+    .results-section.visible { display: block; }
+
+    .result-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .result-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .result-value {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .result-value.success { color: var(--success); }
+    .result-value.warning { color: var(--warning); }
+
+    /* JSON Inspector - Collapsible */
+    .json-inspector {
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .json-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .json-header:hover { background: var(--surface-raised); }
+    .json-header h4 {
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .json-toggle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .json-content {
+      max-height: 250px;
       overflow-y: auto;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      font-size: 11px;
       line-height: 1.7;
-      color: var(--text-dim);
+      padding: 12px;
       white-space: pre-wrap;
       word-break: break-all;
-      max-height: 300px;
+      display: none;
     }
+    .json-content.visible { display: block; }
     .json-key { color: #7dd3fc; }
     .json-str { color: #86efac; }
     .json-num { color: #fbbf24; }
     .json-bool { color: #f472b6; }
 
-    /* Toast */
-    #toast {
-      position: fixed;
-      bottom: 28px;
+    /* Canvas Area */
+    .canvas-area {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* View Selector */
+    .view-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .view-tabs {
+      display: flex;
+      gap: 4px;
+    }
+    .view-tab {
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab[aria-current="true"] {
+      background: rgba(59,130,246,0.15);
+      border-color: var(--border-focus);
+      color: var(--accent);
+    }
+    .frame-info {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--surface-raised);
+      padding: 5px 10px;
+      border-radius: var(--radius);
+    }
+
+    /* Canvas Wrapper */
+    .canvas-wrapper {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Empty State */
+    .empty-state {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .empty-state.hidden { display: none; }
+    .empty-icon {
+      font-size: 48px;
+      opacity: 0.2;
+    }
+    .empty-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 280px;
+      line-height: 1.6;
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(6,8,16,0.9);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      backdrop-filter: blur(4px);
+    }
+    .loading-overlay.visible { display: flex; }
+    .loading-spinner {
+      width: 44px;
+      height: 44px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Timeline */
+    .timeline {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .play-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      border: none;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, box-shadow 0.2s;
+      flex-shrink: 0;
+    }
+    .play-btn:hover { transform: scale(1.05); box-shadow: 0 0 16px rgba(59,130,246,0.4); }
+    .scrubber {
+      flex: 1;
+      height: 6px;
+      appearance: none;
+      background: var(--surface-raised);
+      border-radius: 6px;
+      cursor: pointer;
+      outline: none;
+    }
+    .scrubber::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 0 3px var(--accent);
+      cursor: grab;
+    }
+
+    /* Tooltips */
+    .tooltip {
+      position: relative;
+    }
+    .tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
       left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--surface2);
+      transform: translateX(-50%);
+      background: var(--surface-raised);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      padding: 6px 10px;
+      border-radius: var(--radius);
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .tooltip:hover::after { opacity: 1; }
+
+    /* Toast Notifications */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--surface-raised);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
       padding: 12px 20px;
       font-size: 14px;
       font-weight: 500;
@@ -276,293 +609,255 @@
       z-index: 1000;
       transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.35s;
       opacity: 0;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-      white-space: nowrap;
     }
-    #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-    #toast.success { border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.12); }
-    #toast.error { border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.12); }
-    #toast.info { border-color: var(--border-glow); background: rgba(79,143,255,0.1); }
-
-    /* ─── MAIN CANVAS AREA ─── */
-    .main {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .canvas-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 20px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(13,22,40,0.5);
-      flex-shrink: 0;
-    }
-    .toolbar-left { display: flex; align-items: center; gap: 10px; }
-    .toolbar-btn {
-      padding: 6px 14px;
-      border-radius: 7px;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      color: var(--text-dim);
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .toolbar-btn:hover { border-color: var(--border-glow); color: var(--text); }
-    .toolbar-btn.active { background: rgba(79,143,255,0.15); border-color: var(--border-glow); color: var(--accent); }
-
-    .frame-counter {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text-muted);
-      background: var(--surface2);
-      padding: 4px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-    }
-
-    canvas#stage {
-      flex: 1;
-      width: 100%;
-      display: block;
-      cursor: crosshair;
-    }
-
-    .timeline-bar {
-      padding: 14px 20px;
-      border-top: 1px solid var(--border);
-      background: rgba(13,22,40,0.7);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-shrink: 0;
-    }
-    .play-btn {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border: none;
-      color: white;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 0.15s, box-shadow 0.2s;
-      flex-shrink: 0;
-    }
-    .play-btn:hover { transform: scale(1.08); box-shadow: 0 0 20px rgba(79,143,255,0.4); }
-
-    input[type="range"]#scrubber {
-      flex: 1;
-      height: 4px;
-      appearance: none;
-      background: linear-gradient(to right, var(--accent) 0%, var(--surface2) 0%);
-      border-radius: 4px;
-      outline: none;
-      cursor: pointer;
-    }
-    input[type="range"]#scrubber::-webkit-slider-thumb {
-      appearance: none;
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: #fff;
-      box-shadow: 0 0 0 3px var(--accent);
-      cursor: grab;
-    }
-
-    /* Loading spinner overlay on canvas */
-    #loadingOverlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(7,11,20,0.85);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 16px;
-      z-index: 20;
-      backdrop-filter: blur(4px);
-    }
-    #loadingOverlay.visible { display: flex; }
-    .spinner {
-      width: 44px; height: 44px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    #loadingOverlay p { font-size: 14px; color: var(--text-muted); font-weight: 500; }
-
-    .canvas-wrapper {
-      position: relative;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    /* Empty state */
-    .empty-state {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      pointer-events: none;
-    }
-    .empty-state .es-icon { font-size: 48px; opacity: 0.15; }
-    .empty-state p { font-size: 14px; color: var(--text-muted); text-align: center; line-height: 1.6; max-width: 260px; }
-
-    /* scrollbar */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-    /* Hidden until CIR loads */
-    .hidden-until-compile {
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s ease;
-    }
-    .hidden-until-compile.revealed {
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
       opacity: 1;
-      pointer-events: auto;
+    }
+    .toast.success { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.1); }
+    .toast.error { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.1); }
+    .toast.info { border-color: var(--border-focus); background: rgba(59,130,246,0.1); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* Focus states for accessibility */
+    *:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Hidden utility */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
     }
   </style>
 </head>
 <body>
 
-<!-- ─── HEADER ─── -->
+<!-- Accessibility Skip Link -->
+<a href="#prompt-input" class="skip-link">Skip to prompt input</a>
+
+<!-- Workflow Progress Bar -->
+<nav class="workflow-progress" role="navigation" aria-label="Workflow progress">
+  <div class="progress-track" role="list">
+    <div class="progress-step" role="listitem">
+      <div class="step-indicator" id="step-compile">1</div>
+      <span class="step-label" id="label-compile">Compile</span>
+    </div>
+    <div class="progress-step" role="listitem">
+      <div class="step-indicator" id="step-validate">2</div>
+      <span class="step-label" id="label-validate">Validate</span>
+    </div>
+    <div class="progress-step" role="listitem">
+      <div class="step-indicator" id="step-render">3</div>
+      <span class="step-label" id="label-render">Render</span>
+    </div>
+    <div class="progress-step" role="listitem">
+      <div class="step-indicator" id="step-play">4</div>
+      <span class="step-label" id="label-play">Play</span>
+    </div>
+    <div class="progress-percentage" id="progress-pct">0%</div>
+  </div>
+</nav>
+
+<!-- Header -->
 <header>
   <div class="logo">
-    <div class="logo-icon">🎬</div>
+    <div class="logo-icon" aria-hidden="true">▶</div>
     <span>Nivix</span>
-    <span class="logo-tag">CIR v4.0</span>
+    <span class="version-badge">CIR v4.0</span>
   </div>
-  <div id="apiStatus" class="api-status checking">
-    <div class="dot"></div>
-    <span id="apiStatusText">Checking API…</span>
+  
+  <!-- API Connection Status -->
+  <div class="api-status" role="status" aria-live="polite" aria-label="API connection status">
+    <div class="status-indicator" id="status-indicator">
+      <div class="status-dot" aria-hidden="true"></div>
+      <span class="status-text" id="status-text">Checking…</span>
+    </div>
+    <div class="status-latency" id="status-latency" aria-label="Response latency"></div>
   </div>
 </header>
 
-<!-- ─── APP GRID ─── -->
-<div class="app">
+<!-- Main App -->
+<main class="app" id="app-main">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-
-    <!-- Prompt -->
-    <div class="sidebar-section">
-      <div class="section-label">Prompt</div>
-      <div class="prompt-wrapper">
-        <textarea id="promptInput" placeholder="e.g. explain why imaginary numbers exist, show how RSA encryption works, demonstrate a derivative…"></textarea>
-      </div>
-
-      <div class="section-label" style="margin-top:14px;">Model</div>
-      <select id="modelSelect">
-        <option value="auto">⚡ Auto (Free Fallback Chain)</option>
-        <option value="meta-llama/llama-3.1-8b-instruct:free">🦙 Meta Llama 3.1 8B (Free)</option>
-        <option value="mistralai/mistral-7b-instruct:free">💎 Mistral 7B (Free)</option>
-        <option value="google/gemma-3-12b-it:free">🟢 Google Gemma 3 12B (Free)</option>
-        <option value="microsoft/phi-3-mini-128k-instruct:free">🔷 Microsoft Phi-3 Mini (Free)</option>
-        <option value="qwen/qwen-2-7b-instruct:free">🐉 Qwen 2 7B (Free)</option>
-      </select>
-
-      <button class="compile-btn" id="compileBtn" onclick="compileCIR()">
-        <span id="compileBtnIcon">▶</span>
-        <span id="compileBtnText">Compile & Visualize</span>
-      </button>
-    </div>
-
-    <!-- Meta info -->
-    <div class="sidebar-section hidden-until-compile" id="metaSection">
-      <div class="section-label">Execution Metadata</div>
-      <div class="meta-grid">
-        <div class="meta-card">
-          <div class="mc-label">Confidence</div>
-          <div class="mc-value good" id="metaConf">—</div>
-        </div>
-        <div class="meta-card">
-          <div class="mc-label">Latency</div>
-          <div class="mc-value" id="metaLatency">—</div>
-        </div>
-        <div class="meta-card">
-          <div class="mc-label">Nodes</div>
-          <div class="mc-value" id="metaNodes">—</div>
-        </div>
-        <div class="meta-card">
-          <div class="mc-label">Template</div>
-          <div class="mc-value" id="metaTemplate" style="font-size:10px;word-break:break-all">—</div>
-        </div>
+  <!-- Input Panel -->
+  <aside class="input-panel" role="complementary" aria-label="Input controls">
+    
+    <!-- Prompt Area -->
+    <div class="prompt-area">
+      <label for="prompt-input" class="prompt-label">What would you like to visualize?</label>
+      <textarea 
+        id="prompt-input" 
+        class="prompt-textarea"
+        placeholder="e.g. explain why imaginary numbers exist, show how RSA encryption works, demonstrate a derivative…"
+        rows="4"
+        aria-describedby="prompt-hint"
+      ></textarea>
+      <div class="prompt-hint" id="prompt-hint">
+        Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to submit
       </div>
     </div>
 
-    <!-- CIR Inspector -->
-    <div class="sidebar-section hidden-until-compile" id="inspectorSection" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
-      <div class="section-label">CIR Inspector</div>
-      <div class="json-inspector" id="jsonInspector">Awaiting compile…</div>
+    <!-- Submit Button -->
+    <button 
+      class="submit-btn" 
+      id="submit-btn"
+      onclick="compileCIR()"
+      aria-label="Compile and visualize prompt"
+    >
+      <span id="btn-icon">▶</span>
+      <span id="btn-text">Compile & Visualize</span>
+    </button>
+
+    <!-- Model Transparency -->
+    <div class="model-info">
+      <div class="section-title">LLM Model</div>
+      <div class="model-card">
+        <div class="model-name" id="model-name">Auto (Free Fallback)</div>
+        <div class="model-source" id="model-source">OpenRouter Free Tier</div>
+        <div class="model-params">
+          <span class="param">
+            <span class="param-label">Temp:</span>
+            <span class="param-value">0.3</span>
+          </span>
+          <span class="param">
+            <span class="param-label">Max:</span>
+            <span class="param-value">800</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results (hidden until compile) -->
+    <div class="results-section" id="results-section">
+      <div class="section-title">Results</div>
+      
+      <div class="result-card">
+        <div class="result-label">Status</div>
+        <div class="result-value" id="result-status">—</div>
+      </div>
+      
+      <div class="result-card">
+        <div class="result-label">Nodes Generated</div>
+        <div class="result-value" id="result-nodes">—</div>
+      </div>
+      
+      <div class="result-card">
+        <div class="result-label">Confidence</div>
+        <div class="result-value" id="result-confidence">—</div>
+      </div>
+      
+      <div class="result-card">
+        <div class="result-label">Latency</div>
+        <div class="result-value" id="result-latency">—</div>
+      </div>
+    </div>
+
+    <!-- JSON Inspector -->
+    <div class="panel-section">
+      <div class="section-title">CIR Output</div>
+      <div class="json-inspector">
+        <button 
+          class="json-header" 
+          onclick="toggleJSON()"
+          aria-expanded="false"
+          id="json-toggle-btn"
+        >
+          <h4>View Raw CIR</h4>
+          <span class="json-toggle" id="json-toggle-icon">▼</span>
+        </button>
+        <pre class="json-content" id="json-content" role="region" aria-label="CIR JSON output"></pre>
+      </div>
     </div>
 
   </aside>
 
-  <!-- CANVAS AREA -->
-  <div class="main">
-    <div class="canvas-toolbar hidden-until-compile" id="canvasToolbar">
-      <div class="toolbar-left">
-        <button class="toolbar-btn active" id="btnScene" onclick="setView('scene')">🎬 Scene</button>
-        <button class="toolbar-btn" id="btnAttention" onclick="setView('attention')">👁 Attention</button>
-        <button class="toolbar-btn" id="btnGraph" onclick="setView('graph')">🔗 Graph</button>
+  <!-- Canvas Area -->
+  <section class="canvas-area" role="main" aria-label="Visualization canvas">
+    
+    <!-- View Toolbar -->
+    <div class="view-toolbar">
+      <div class="view-tabs" role="tablist" aria-label="View modes">
+        <button class="view-tab" role="tab" aria-selected="true" id="tab-scene" aria-controls="canvas-wrapper" onclick="setView('scene')">Scene</button>
+        <button class="view-tab" role="tab" aria-selected="false" id="tab-attention" aria-controls="canvas-wrapper" onclick="setView('attention')">Attention</button>
+        <button class="view-tab" role="tab" aria-selected="false" id="tab-graph" aria-controls="canvas-wrapper" onclick="setView('graph')">Graph</button>
       </div>
-      <div class="frame-counter" id="frameCounter">Frame 0 / 150</div>
+      <div class="frame-info" id="frame-info" aria-live="polite">Frame 0 / 150</div>
     </div>
 
-    <div class="canvas-wrapper">
-      <div class="empty-state" id="emptyState">
-        <div class="es-icon">🎞</div>
-        <p>Enter a prompt and click <strong>Compile & Visualize</strong> to see the reasoning engine in action.</p>
+    <!-- Canvas -->
+    <div class="canvas-wrapper" id="canvas-wrapper" role="img" aria-label="Animation visualization">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon" aria-hidden="true">▶</div>
+        <p class="empty-text">Enter a prompt and click <strong>Compile & Visualize</strong> to generate an animated explanation.</p>
       </div>
-      <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <p id="loadingMsg">Compiling CIR…</p>
+      <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <div class="loading-text" id="loading-text">Compiling…</div>
       </div>
-      <canvas id="stage"></canvas>
+      <canvas id="stage" aria-label="Animation stage"></canvas>
     </div>
 
-    <div class="timeline-bar hidden-until-compile" id="timelineBar">
-      <button class="play-btn" id="playBtn" onclick="togglePlay()">▶</button>
-      <input type="range" id="scrubber" min="0" max="150" value="0" oninput="scrubTo(this.value)" />
+    <!-- Timeline -->
+    <div class="timeline">
+      <button 
+        class="play-btn" 
+        id="play-btn"
+        onclick="togglePlay()"
+        aria-label="Play or pause animation"
+        disabled
+      >▶</button>
+      <input 
+        type="range" 
+        class="scrubber" 
+        id="scrubber"
+        min="0"
+        max="150"
+        value="0"
+        oninput="scrubTo(this.value)"
+        aria-label="Timeline scrubber"
+        disabled
+      />
     </div>
-  </div>
-</div>
 
-<!-- TOAST -->
-<div id="toast"></div>
+  </section>
+</main>
+
+<!-- Toast -->
+<div id="toast" role="alert" aria-live="assertive"></div>
 
 <script>
-  // ─── State ───
+  // Configuration
+  const API_BASE = "https://nivix.onrender.com";
+  const MAX_FRAMES = 150;
+
+  // State
   let activeCIR = null;
   let currentFrame = 0;
   let isPlaying = false;
   let animId = null;
   let currentView = 'scene';
-  const MAX_FRAMES = 150;
-  const API_BASE = "https://nivix.onrender.com";
+  let apiLatency = null;
+  let lastError = null;
 
-  // ─── Canvas setup ───
+  // Canvas
   const canvas = document.getElementById('stage');
   const ctx = canvas.getContext('2d');
 
   function resizeCanvas() {
-    const wrapper = canvas.parentElement;
+    const wrapper = document.getElementById('canvas-wrapper');
     canvas.width = wrapper.clientWidth;
     canvas.height = wrapper.clientHeight;
     if (activeCIR) renderFrame(currentFrame);
@@ -571,89 +866,157 @@
   window.addEventListener('resize', resizeCanvas);
   setTimeout(resizeCanvas, 50);
 
+  // ─── Progress Bar ───
+  function updateProgress(step, percent) {
+    const steps = ['compile', 'validate', 'render', 'play'];
+    steps.forEach((s, i) => {
+      const indicator = document.getElementById('step-' + s);
+      const label = document.getElementById('label-' + s);
+      
+      if (i < step) {
+        indicator.className = 'step-indicator completed';
+        indicator.textContent = '✓';
+        label.className = 'step-label completed';
+      } else if (i === step) {
+        indicator.className = 'step-indicator active';
+        indicator.textContent = i + 1;
+        label.className = 'step-label active';
+      } else {
+        indicator.className = 'step-indicator';
+        indicator.textContent = i + 1;
+        label.className = 'step-label';
+      }
+    });
+    document.getElementById('progress-pct').textContent = percent + '%';
+  }
+
   // ─── API Status Check ───
   async function checkAPIStatus() {
-    const pill = document.getElementById('apiStatus');
-    const label = document.getElementById('apiStatusText');
-    pill.className = 'api-status checking';
-    label.textContent = 'Checking API…';
+    const indicator = document.getElementById('status-indicator');
+    const text = document.getElementById('status-text');
+    const latencyEl = document.getElementById('status-latency');
+    
+    indicator.className = 'status-indicator connecting';
+    text.textContent = 'Connecting…';
+    latencyEl.textContent = '';
 
+    const t0 = performance.now();
     try {
-      const res = await fetch(`${API_BASE}/api/compile`, {
+      const res = await fetch(API_BASE + '/api/compile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: 'ping' }),
         signal: AbortSignal.timeout(8000)
       });
+      
+      apiLatency = Math.round(performance.now() - t0);
+      
       if (res.ok || res.status === 400) {
-        pill.className = 'api-status online';
-        label.textContent = 'API Online';
+        indicator.className = 'status-indicator online';
+        text.textContent = 'Connected';
+        latencyEl.textContent = apiLatency + 'ms';
+        lastError = null;
       } else {
-        throw new Error('bad status');
+        throw new Error('Status ' + res.status);
       }
     } catch (e) {
-      pill.className = 'api-status offline';
-      label.textContent = 'API Offline';
-      showToast('⚠️ Backend unreachable — running in demo mode', 'error');
+      indicator.className = 'status-indicator offline';
+      text.textContent = 'Offline';
+      latencyEl.textContent = '';
+      lastError = e.message;
     }
   }
   checkAPIStatus();
-  setInterval(checkAPIStatus, 30000);
+  setInterval(checkAPIStatus, 20000);
 
   // ─── Compile ───
   async function compileCIR() {
-    const prompt = document.getElementById('promptInput').value.trim();
-    if (!prompt) { showToast('Please enter a prompt first', 'error'); return; }
+    const prompt = document.getElementById('prompt-input').value.trim();
+    if (!prompt) {
+      showToast('Please enter a prompt first', 'error');
+      return;
+    }
 
-    const btn = document.getElementById('compileBtn');
-    const icon = document.getElementById('compileBtnIcon');
-    const txt = document.getElementById('compileBtnText');
+    const btn = document.getElementById('submit-btn');
+    const icon = document.getElementById('btn-icon');
+    const txt = document.getElementById('btn-text');
     btn.disabled = true;
     icon.textContent = '⏳';
     txt.textContent = 'Compiling…';
 
-    showLoading('Calling Semantic Planner…');
+    updateProgress(0, 10);
+    showLoading('Compiling CIR…');
 
     const t0 = performance.now();
     try {
-      const res = await fetch(`${API_BASE}/api/compile`, {
+      const res = await fetch(API_BASE + '/api/compile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt }),
-        signal: AbortSignal.timeout(25000)
+        signal: AbortSignal.timeout(30000)
       });
 
       const latency = Math.round(performance.now() - t0);
+      apiLatency = latency;
+
+      updateProgress(1, 30);
+      showLoading('Validating schema…');
+      await new Promise(r => setTimeout(r, 300));
 
       if (!res.ok) {
         const err = await res.json();
-        showToast(`❌ Schema Error: ${err.detail?.validation_report || 'Unknown'}`, 'error');
+        updateProgress(0, 0);
+        showToast('Validation Error: ' + (err.detail?.validation_report || 'Unknown'), 'error');
         return;
       }
 
       const data = await res.json();
       activeCIR = data.cir;
 
+      updateProgress(2, 60);
+      showLoading('Preparing render…');
+      await new Promise(r => setTimeout(r, 200));
+
       // Update UI
       hideLoading();
-      document.getElementById('emptyState').style.display = 'none';
-      // Reveal controls for the first time
-      ['canvasToolbar', 'timelineBar', 'metaSection', 'inspectorSection'].forEach(id => {
-        document.getElementById(id).classList.add('revealed');
-      });
-      updateMeta(activeCIR, latency);
+      document.getElementById('empty-state').classList.add('hidden');
+      document.getElementById('results-section').classList.add('visible');
+      
+      // Update results
+      document.getElementById('result-status').textContent = 'Success';
+      document.getElementById('result-status').className = 'result-value success';
+      document.getElementById('result-nodes').textContent = activeCIR.nodes.length;
+      
+      const conf = activeCIR.meta.semantic_confidence;
+      const confEl = document.getElementById('result-confidence');
+      confEl.textContent = (conf * 100).toFixed(0) + '%';
+      confEl.className = 'result-value ' + (conf > 0.8 ? 'success' : 'warning');
+      
+      document.getElementById('result-latency').textContent = latency + 'ms';
+      
+      // Update JSON inspector
       updateJSONInspector(activeCIR);
+      
+      // Enable timeline
       currentFrame = 0;
       document.getElementById('scrubber').value = 0;
+      document.getElementById('scrubber').disabled = false;
+      document.getElementById('play-btn').disabled = false;
+      
+      document.getElementById('status-latency').textContent = latency + 'ms';
+      
       renderFrame(0);
-      showToast(`✅ CIR compiled — ${activeCIR.nodes.length} nodes, confidence ${activeCIR.meta.semantic_confidence}`, 'success');
+      
+      updateProgress(3, 100);
+      showToast('Compiled ' + activeCIR.nodes.length + ' nodes in ' + latency + 'ms', 'success');
 
     } catch (e) {
       hideLoading();
+      updateProgress(0, 0);
       if (e.name === 'TimeoutError') {
-        showToast('⏱️ Request timed out — API may be starting up', 'error');
+        showToast('Request timed out', 'error');
       } else {
-        showToast('❌ API unreachable — check backend status', 'error');
+        showToast('Error: ' + e.message, 'error');
       }
     } finally {
       btn.disabled = false;
@@ -662,43 +1025,46 @@
     }
   }
 
-  // Enter key shortcut
-  document.getElementById('promptInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) compileCIR();
+  // Keyboard shortcut
+  document.getElementById('prompt-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) compileCIR();
   });
 
-  // ─── Meta panel ───
-  function updateMeta(cir, latency) {
-    const conf = cir.meta.semantic_confidence;
-    const confEl = document.getElementById('metaConf');
-    confEl.textContent = (conf * 100).toFixed(0) + '%';
-    confEl.className = 'mc-value ' + (conf > 0.8 ? 'good' : 'warn');
-    document.getElementById('metaLatency').textContent = latency + 'ms';
-    document.getElementById('metaNodes').textContent = cir.nodes.length;
-    document.getElementById('metaTemplate').textContent = (cir.meta.template || '—').replace(/_/g,' ');
+  // ─── JSON Inspector Toggle ───
+  function toggleJSON() {
+    const content = document.getElementById('json-content');
+    const btn = document.getElementById('json-toggle-btn');
+    const icon = document.getElementById('json-toggle-icon');
+    
+    const isVisible = content.classList.toggle('visible');
+    btn.setAttribute('aria-expanded', isVisible);
+    icon.textContent = isVisible ? '▲' : '▼';
   }
 
-  // ─── JSON Inspector ───
   function updateJSONInspector(cir) {
     const raw = JSON.stringify(cir, null, 2);
     const html = raw
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
       .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
       .replace(/: "([^"]*)"/g, ': <span class="json-str">"$1"</span>')
       .replace(/: (\d+\.?\d*)/g, ': <span class="json-num">$1</span>')
       .replace(/: (true|false)/g, ': <span class="json-bool">$1</span>');
-    document.getElementById('jsonInspector').innerHTML = html;
+    document.getElementById('json-content').innerHTML = html;
   }
 
-  // ─── View switcher ───
-  function setView(v) {
-    currentView = v;
-    ['btnScene','btnAttention','btnGraph'].forEach(id => document.getElementById(id).classList.remove('active'));
-    document.getElementById('btn' + v.charAt(0).toUpperCase() + v.slice(1)).classList.add('active');
+  // ─── View Switching ───
+  function setView(view) {
+    currentView = view;
+    ['scene', 'attention', 'graph'].forEach(v => {
+      const tab = document.getElementById('tab-' + v);
+      tab.setAttribute('aria-selected', v === view);
+    });
     if (activeCIR) renderFrame(currentFrame);
   }
 
-  // ─── Render ───
+  // ─── Rendering ───
   function renderEmpty() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
@@ -752,16 +1118,12 @@
     else if (currentView === 'attention') renderAttentionView(frame);
     else renderGraphView(frame);
 
-    // frame counter
-    document.getElementById('frameCounter').textContent = `Frame ${frame} / ${MAX_FRAMES}`;
-    // scrubber gradient
+    document.getElementById('frame-info').textContent = `Frame ${frame} / ${MAX_FRAMES}`;
     const pct = (frame / MAX_FRAMES) * 100;
-    document.getElementById('scrubber').style.background =
-      `linear-gradient(to right, var(--accent) ${pct}%, var(--surface2) ${pct}%)`;
+    document.getElementById('scrubber').style.background = `linear-gradient(to right, var(--accent) ${pct}%, var(--surface-raised) ${pct}%)`;
   }
 
   function renderSceneView(frame) {
-    const W = canvas.width, H = canvas.height;
     const nodes = activeCIR.nodes || [];
 
     nodes.forEach(node => {
@@ -774,7 +1136,6 @@
       ctx.save();
       ctx.globalAlpha = opacity;
 
-      // Focus glow ring
       if (focused) {
         const grad = ctx.createRadialGradient(x, y, 30, x, y, 80);
         grad.addColorStop(0, color.replace(')', ', 0.15)').replace('rgb', 'rgba'));
@@ -793,7 +1154,6 @@
         ctx.setLineDash([]);
       }
 
-      // Node circle
       const grad2 = ctx.createRadialGradient(x - 8, y - 8, 2, x, y, 34);
       grad2.addColorStop(0, color + 'ee');
       grad2.addColorStop(1, color + '66');
@@ -805,14 +1165,12 @@
       ctx.fill();
       ctx.shadowBlur = 0;
 
-      // Border
       ctx.strokeStyle = color;
       ctx.lineWidth = focused ? 2 : 1;
       ctx.stroke();
 
-      // Label
       ctx.fillStyle = '#fff';
-      ctx.font = `600 12px Inter, sans-serif`;
+      ctx.font = '600 12px Inter, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const label = node.label || node.id;
@@ -827,15 +1185,13 @@
       lines.push(line);
       lines.forEach((l, i) => ctx.fillText(l, x, y + (i - (lines.length - 1) / 2) * 14));
 
-      // Type badge
-      ctx.font = `500 10px Inter, sans-serif`;
+      ctx.font = '500 10px Inter, sans-serif';
       ctx.fillStyle = color;
       ctx.fillText(node.type, x, y + 50);
 
       ctx.restore();
     });
 
-    // Draw constraint lines
     (activeCIR.constraints || []).forEach(c => {
       const nodeIds = c.nodes || [];
       if (nodeIds.length < 2) return;
@@ -860,7 +1216,6 @@
   }
 
   function renderAttentionView(frame) {
-    const W = canvas.width, H = canvas.height;
     const attention = activeCIR.attention || [];
     const nodes = activeCIR.nodes || [];
 
@@ -903,7 +1258,6 @@
         ctx.lineWidth = 1.5;
         ctx.globalAlpha = 0.5;
         ctx.beginPath(); ctx.moveTo(prev.x, prev.y); ctx.lineTo(curr.x, curr.y); ctx.stroke();
-        // Arrow
         const angle = Math.atan2(curr.y - prev.y, curr.x - prev.x);
         const mx = (prev.x + curr.x) / 2, my = (prev.y + curr.y) / 2;
         ctx.globalAlpha = 0.8;
@@ -915,7 +1269,6 @@
         ctx.fill();
         ctx.restore();
 
-        // label
         ctx.save();
         ctx.globalAlpha = 0.6;
         ctx.font = '11px Inter';
@@ -951,14 +1304,18 @@
     currentFrame = Math.min(currentFrame + 1, MAX_FRAMES);
     document.getElementById('scrubber').value = currentFrame;
     renderFrame(currentFrame);
-    if (currentFrame >= MAX_FRAMES) { isPlaying = false; document.getElementById('playBtn').textContent = '▶'; return; }
+    if (currentFrame >= MAX_FRAMES) {
+      isPlaying = false;
+      document.getElementById('play-btn').textContent = '▶';
+      return;
+    }
     animId = requestAnimationFrame(() => setTimeout(tick, 1000 / 60));
   }
 
   function togglePlay() {
     if (!activeCIR) { showToast('Compile a prompt first', 'info'); return; }
     isPlaying = !isPlaying;
-    document.getElementById('playBtn').textContent = isPlaying ? '⏸' : '▶';
+    document.getElementById('play-btn').textContent = isPlaying ? '⏸' : '▶';
     if (isPlaying) {
       if (currentFrame >= MAX_FRAMES) currentFrame = 0;
       tick();
@@ -970,14 +1327,14 @@
     if (activeCIR) renderFrame(currentFrame);
   }
 
-  // ─── Loading overlay ───
+  // ─── Loading ───
   function showLoading(msg) {
-    const el = document.getElementById('loadingOverlay');
-    document.getElementById('loadingMsg').textContent = msg || 'Loading…';
+    const el = document.getElementById('loading-overlay');
+    document.getElementById('loading-text').textContent = msg || 'Loading…';
     el.classList.add('visible');
   }
   function hideLoading() {
-    document.getElementById('loadingOverlay').classList.remove('visible');
+    document.getElementById('loading-overlay').classList.remove('visible');
   }
 
   // ─── Toast ───
@@ -985,10 +1342,13 @@
   function showToast(msg, type = 'info') {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.className = `show ${type}`;
+    t.className = 'show ' + type;
     clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => { t.className = type; }, 4000);
+    toastTimeout = setTimeout(() => { t.className = type; }, 3500);
   }
+
+  // Initialize progress
+  updateProgress(-1, 0);
 </script>
 </body>
 </html>
