@@ -128,9 +128,8 @@ class CompileRequest(BaseModel):
     prompt: str = ""
     expression: str = ""
     text: str = ""
-    input: str = ""
     query: str = ""
-    query_: str = ""
+    query_str: str = ""
     
     def get_content(self) -> str:
         """Get content from any available field."""
@@ -138,9 +137,8 @@ class CompileRequest(BaseModel):
             self.expression or 
             self.prompt or 
             self.text or 
-            self.input or 
             self.query or 
-            self.query_
+            self.query_str
         )
 
 def generate_v4_cir(prompt: str) -> dict:
