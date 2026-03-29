@@ -198,20 +198,26 @@ def generate_v4_cir(prompt: str) -> dict:
         })
         
     else:
-        # 3. Dynamic API Call via Pass 1 (LLM Reasoning)
+        # 3. LLM Reasoning (force always)
         import os
         api_key = os.environ.get("OPENROUTER_API_KEY")
-        has_key = bool(api_key)
-        key_prefix = api_key[:15] if api_key else "NONE"
-        # Include debug in response
-        cir["meta"]["_debug"] = {
-            "has_api_key": has_key,
-            "key_prefix": key_prefix,
-            "api_key_env": "OPENROUTER_API_KEY"
-        }
-        pass1_result = run_pass1_nodes(prompt)
+        print(f"=== FORCED LLM PATH: key={bool(api_key)} ===")
+        
+        # Force skip cache, call LLM directly through pass1
+        from nivix.core.planner.llm_pass1 import run_pass1_nodes
+        try:
+            pass1_result = run_pass1_nodes(prompt, use_cache=False)
+        except Exception as e:
+            print(f"=== LLM ERROR: {e} ===")
+            pass1_result = {"nodes": [], "source": f"error: {e}"}
+        
         source = pass1_result.get("source", "unknown")
         nodes = pass1_result.get("nodes", [])
+        
+        cir["meta"]["_debug"] = {
+            "llm_source": source,
+            "nodes_len": len(nodes)
+        }
         
         cir["meta"]["template"] = f"dynamic_generated (source: {pass1_result.get('source')})"
         cir["meta"]["semantic_confidence"] = 0.85
