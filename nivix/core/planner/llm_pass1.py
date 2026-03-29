@@ -19,14 +19,13 @@ import urllib.error
 CACHE_DIR = os.path.join(os.path.dirname(__file__), ".pass1_cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
 
-# OpenRouter free model fallback chain (tried in order)
-# Updated - using currently available free models
+# OpenRouter free model fallback chain (verified working)
 FREE_MODEL_CHAIN = [
-    "google/gemma-2-9b-it:free",
-    "deepseek/deepseek-chat:free",
-    "qwen/qwen-2-7b-instruct:free",
-    "mistralai/mistral-7b-instruct:free",
-    "cognitive/computor-7b-instruct:free",
+    "minimax/minimax-m2.5:free",
+    "openrouter/free",
+    "stepfun/step-3.5-flash:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "liquid/lfm-2.5-1.2b-instruct:free",
 ]
 
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
