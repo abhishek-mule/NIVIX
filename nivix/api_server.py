@@ -254,13 +254,18 @@ def generate_v4_cir(prompt: str) -> dict:
 
 @app.get("/api/status")
 async def status_endpoint():
-    """Check API status including API key"""
+    """Check API status including all env vars"""
+    import os
     API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+    FORCE = os.environ.get("FORCE_LLM", "not set")
+    # List all env vars for debugging
+    envs = {k:v for k,v in os.environ.items() if 'OPEN' in k.upper()}
     return {
         "status": "online",
         "has_api_key": bool(API_KEY),
-        "key_prefix": API_KEY[:15] + "..." if API_KEY else None,
-        "env_var": "OPENROUTER_API_KEY"
+        "key_prefix": API_KEY[:20] + "..." if API_KEY else None,
+        "force_llm": FORCE,
+        "relevant_envs": envs
     }
 
 @app.post("/api/compile")
