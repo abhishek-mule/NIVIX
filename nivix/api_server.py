@@ -1,9 +1,21 @@
 import time
 import json
+import os
+import hashlib
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import uvicorn
+
+# Render output directory
+RENDER_DIR = os.path.join(os.path.dirname(__file__), "renders")
+os.makedirs(RENDER_DIR, exist_ok=True)
+
+def compute_render_hash(content: str, target: str) -> str:
+    """Deterministic hash from content + target - same input = same hash."""
+    data = f"{content}:{target}"
+    return hashlib.sha256(data.encode()).hexdigest()[:12]
 
 # Import the new strict v4.0 CIR Validator
 try:
@@ -113,7 +125,7 @@ def parse_expression(expr: str) -> dict:
     cir["meta"]["rewritten"] = expanded
     return cir
 
-app = FastAPI(title="Nivix Rendering & Reasoning API", version="4.0")  # v8.3 - compatibility
+app = FastAPI(title="Nivix Rendering & Reasoning API", version="4.0")
 
 # Enable CORS for external frontend consumers (like Vercel UI)
 app.add_middleware(
@@ -125,22 +137,8 @@ app.add_middleware(
 )
 
 class CompileRequest(BaseModel):
-    prompt: str | None = None
-    expression: str | None = None
-    text: str | None = None
-    query: str | None = None
-    input: str | None = None
-    
-    def get_content(self) -> str:
-        """Get content from any available field."""
-        return (
-            self.expression or 
-            self.prompt or 
-            self.text or 
-            self.query or 
-            self.input or
-            ""
-        )
+    prompt: str = None
+    expression: str = None
 
 def generate_v4_cir(prompt: str) -> dict:
     """
@@ -255,18 +253,13 @@ async def compile_endpoint(request: CompileRequest):
     Main Compilation Endpoint.
     Consumes a prompt OR expression, generates Execution Graph (CIR), validates against strict Schema.
     """
-    # Handle expression input - unified handler
-    content = request.get_content()
-    if not content or not content.strip():
-        raise HTTPException(status_code=400, detail={"error": "Content required (use expression, prompt, text, input, or query)"})
-    
-    # Use expression parser if it looks like math, otherwise prompt
-    if re.match(r"^\([a-z]\+[a-z]", content, re.IGNORECASE):
-        print(f"--- [API] Received Expression: '{content}' ---")
-        cir = parse_expression(content)
+    # Handle expression input
+    if request.expression:
+        print(f"--- [API] Received Expression: '{request.expression}' ---")
+        cir = parse_expression(request.expression)
     else:
-        print(f"--- [API] Received Prompt: '{content}' ---")
-        cir = generate_v4_cir(content)
+        print(f"--- [API] Received Prompt: '{request.prompt}' ---")
+        cir = generate_v4_cir(request.prompt)
     
     # 2. Strict Schema Validation
     is_valid, error_msg = validate_cir(cir)
@@ -294,42 +287,12 @@ async def compile_endpoint(request: CompileRequest):
         }
     }
 
-@app.post("/api/v2/compile")
-async def compile_v2(body: dict):
-    """
-    Direct JSON endpoint - bypasses Pydantic validation entirely.
-    Accepts any of: expression, prompt, text, query, input
-    """
-    content = (
-        body.get("expression") or 
-        body.get("prompt") or 
-        body.get("text") or 
-        body.get("query") or
-        body.get("input") or
-        ""
-    )
-    if not content or not content.strip():
-        raise HTTPException(status_code=400, detail={"error": "Content required"})
-    
-    # Math expression detection
-    if re.match(r"^\([a-z]\+[a-z]", content, re.IGNORECASE):
-        cir = parse_expression(content)
-    else:
-        cir = generate_v4_cir(content)
-    
-    is_valid, error_msg = validate_cir(cir)
-    if not is_valid:
-        raise HTTPException(status_code=400, detail={"error": "Validation failed", "report": error_msg})
-    
-    return {"status": "success", "cir": cir}
-
 
 @app.post("/api/render")
 async def render_endpoint(body: dict):
     """
     Render CIR to video format.
-    Accepts: expression, prompt, text, query + target format
-    Returns: video file path or URL
+    Returns video_url for deterministic output.
     """
     content = (
         body.get("expression") or 
@@ -338,10 +301,16 @@ async def render_endpoint(body: dict):
         body.get("query") or
         ""
     )
-    target = body.get("target", "png")  # mp4, gif, png
+    target = body.get("target", "mp4")
     
     if not content or not content.strip():
         raise HTTPException(status_code=400, detail={"error": "Content required"})
+    
+    # Compute deterministic hash
+    render_hash = compute_render_hash(content, target)
+    video_filename = f"{render_hash}.{target}"
+    video_path = os.path.join(RENDER_DIR, video_filename)
+    video_url = f"/renders/{video_filename}"
     
     # Generate CIR
     if re.match(r"^\([a-z]\+[a-z]", content, re.IGNORECASE):
@@ -353,35 +322,41 @@ async def render_endpoint(body: dict):
     if not is_valid:
         raise HTTPException(status_code=400, detail={"error": "Validation failed"})
     
-    # Render using Manim adapter (if available)
-    try:
-        from nivix.renderers.manim_adapter import ManimAdapter
-        adapter = ManimAdapter(cir)
-        output_path = adapter.export()
-        
-        return {
-            "status": "success",
-            "cir": cir,
-            "render": {
-                "adapter": "manim",
-                "output": output_path,
-                "format": target
-            }
+    # Check if already rendered (deterministic caching)
+    if os.path.exists(video_path):
+        existing = True
+    else:
+        # Render new video using Manim adapter
+        try:
+            from nivix.renderers.manim_adapter import ManimAdapter
+            adapter = ManimAdapter(cir)
+            output_path = adapter.export()
+            existing = False
+        except ImportError:
+            output_path = None
+        except Exception as e:
+            output_path = None
+    
+    return {
+        "status": "success",
+        "cir": cir,
+        "render": {
+            "hash": render_hash,
+            "adapter": "manim",
+            "video_url": video_url if os.path.exists(video_path) else None,
+            "format": target,
+            "cached": existing if os.path.exists(video_path) else False,
+            "message": "Render complete" if os.path.exists(video_path) else "Install manim locally for video"
         }
-    except ImportError:
-        # Manim not installed - return CIR for external rendering
-        return {
-            "status": "success",
-            "cir": cir,
-            "render": {
-                "adapter": "none",
-                "message": "Install manim locally for video output",
-                "format": target
-            }
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail={"error": f"Render failed: {str(e)}"})
+    }
+
+
+# Mount static files for rendered videos
+if os.path.exists(RENDER_DIR):
+    app.mount("/renders", StaticFiles(directory=RENDER_DIR), name="renders")
+
 
 if __name__ == "__main__":
     print("--- Booting Nivix Schema-Aware Operations API v4.0 ---")
+    print(f"Renders directory: {RENDER_DIR}")
     uvicorn.run(app, host="0.0.0.0", port=8000)
