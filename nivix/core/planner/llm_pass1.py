@@ -74,48 +74,30 @@ def _write_cache(key: str, data: dict):
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
 
-def run_pass1_nodes(prompt: str, use_cache: bool = True) -> dict:
+def run_pass1_nodes(prompt: str, use_cache: bool = False) -> dict:
     """
     Executes Pass 1: LLM-driven Object Graph generation via OpenRouter.
-    Automatically tries each free model in FREE_MODEL_CHAIN until one succeeds.
-    Falls back to keyword-aware heuristics only if ALL models fail.
-    
-    Set use_cache=False to bypass cache and force LLM call.
+    Set use_cache=False to always try LLM (recommended for development).
     """
     import os
     api_key = os.environ.get("OPENROUTER_API_KEY")
-    force_llm = os.environ.get("FORCE_LLM", "false").lower() == "true"
     
-    cache_key = _get_cache_key(prompt)
-    
-    # Only use cache if NOT forcing LLM
-    if use_cache and not force_llm:
-        cached = _read_cache(cache_key)
-        if cached:
-            print(f"[PASS 1] Cache HIT for: '{prompt[:50]}'")
-            cached["source"] = "cache"
-            return cached
-    else:
-        print(f"[PASS 1] Cache BYPASSED, use_cache={use_cache}, force_llm={force_llm}")
-
-    api_key = os.environ.get("OPENROUTER_API_KEY")
-
-    print(f"[PASS 1] API key present: {bool(api_key)}")
+    # Skip cache entirely in this version
+    print(f"[PASS 1] Cache DISABLED, checking API key...")
     
     if api_key:
-        print(f"[PASS 1] Key found, attempting LLM call...")
+        print(f"[PASS 1] API key found, calling LLM...")
         try:
             result = _run_openrouter_pass1(prompt, api_key)
-            print(f"[PASS 1] Result source: {result.get('source')}")
+            # Don't cache LLM results
+            print(f"[PASS 1] LLM SUCCESS, source: {result.get('source')}")
+            return result
         except Exception as e:
-            print(f"[PASS 1] LLM call FAILED: {e}")
-            result = _heuristic_fallback_pass1(prompt)
+            print(f"[PASS 1] LLM EXCEPTION: {e}")
+            return _heuristic_fallback_pass1(prompt)
     else:
-        print("[PASS 1] No OPENROUTER_API_KEY. Using fallback.")
-        result = _heuristic_fallback_pass1(prompt)
-
-    _write_cache(cache_key, result)
-    return result
+        print("[PASS 1] NO API KEY - using fallback")
+        return _heuristic_fallback_pass1(prompt)
 
 
 def _run_openrouter_pass1(prompt: str, api_key: str) -> dict:
