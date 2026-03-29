@@ -196,11 +196,14 @@ def generate_v4_cir(prompt: str) -> dict:
         api_key = os.environ.get("OPENROUTER_API_KEY")
         has_key = bool(api_key)
         key_prefix = api_key[:15] if api_key else "NONE"
-        print(f"=== [API] DEBUG: has_key={has_key}, prefix={key_prefix} ===")
-        print(f"=== [API] DEBUG: Calling run_pass1_nodes for: {prompt} ===")
+        # Include debug in response
+        cir["meta"]["_debug"] = {
+            "has_api_key": has_key,
+            "key_prefix": key_prefix,
+            "api_key_env": "OPENROUTER_API_KEY"
+        }
         pass1_result = run_pass1_nodes(prompt)
         source = pass1_result.get("source", "unknown")
-        print(f"=== [API] DEBUG: source={source} ===")
         nodes = pass1_result.get("nodes", [])
         
         cir["meta"]["template"] = f"dynamic_generated (source: {pass1_result.get('source')})"
