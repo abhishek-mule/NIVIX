@@ -8,4 +8,6 @@ services:
       - key: PYTHON_VERSION
         value: "3.10.0"
       - key: OPENROUTER_API_KEY
-        value: ""
+        value: "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"
+      - key: FORCE_LLM
+        value: "true"
