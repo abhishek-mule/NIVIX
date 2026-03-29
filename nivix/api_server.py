@@ -151,6 +151,7 @@ def generate_v4_cir(prompt: str) -> dict:
     }
     
     # 2. Heuristic Logic (simulating Planner mapping)
+    cir["meta"]["_flow"] = f"content={content[:50]}"
     if "fraction" in content or "numerator" in content:
         cir["meta"]["template"] = "hierarchical_layout_v2"
         cir["meta"]["semantic_confidence"] = 0.89
