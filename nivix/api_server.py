@@ -113,7 +113,7 @@ def parse_expression(expr: str) -> dict:
     cir["meta"]["rewritten"] = expanded
     return cir
 
-app = FastAPI(title="Nivix Rendering & Reasoning API", version="4.0")
+app = FastAPI(title="Nivix Rendering & Reasoning API", version="4.0")  # v8.3 - compatibility
 
 # Enable CORS for external frontend consumers (like Vercel UI)
 app.add_middleware(
