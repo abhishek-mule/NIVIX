@@ -252,6 +252,17 @@ def generate_v4_cir(prompt: str) -> dict:
     return cir
 
 
+@app.get("/api/status")
+async def status_endpoint():
+    """Check API status including API key"""
+    API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+    return {
+        "status": "online",
+        "has_api_key": bool(API_KEY),
+        "key_prefix": API_KEY[:15] + "..." if API_KEY else None,
+        "env_var": "OPENROUTER_API_KEY"
+    }
+
 @app.post("/api/compile")
 async def compile_endpoint(request: CompileRequest):
     """

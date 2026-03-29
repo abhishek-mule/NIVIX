@@ -74,18 +74,29 @@ def _write_cache(key: str, data: dict):
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
 
-def run_pass1_nodes(prompt: str) -> dict:
+def run_pass1_nodes(prompt: str, use_cache: bool = True) -> dict:
     """
     Executes Pass 1: LLM-driven Object Graph generation via OpenRouter.
     Automatically tries each free model in FREE_MODEL_CHAIN until one succeeds.
     Falls back to keyword-aware heuristics only if ALL models fail.
+    
+    Set use_cache=False to bypass cache and force LLM call.
     """
+    import os
+    api_key = os.environ.get("OPENROUTER_API_KEY")
+    force_llm = os.environ.get("FORCE_LLM", "false").lower() == "true"
+    
     cache_key = _get_cache_key(prompt)
-    cached = _read_cache(cache_key)
-    if cached:
-        print(f"[PASS 1] Cache HIT for: '{prompt[:50]}'")
-        cached["source"] = "cache"
-        return cached
+    
+    # Only use cache if NOT forcing LLM
+    if use_cache and not force_llm:
+        cached = _read_cache(cache_key)
+        if cached:
+            print(f"[PASS 1] Cache HIT for: '{prompt[:50]}'")
+            cached["source"] = "cache"
+            return cached
+    else:
+        print(f"[PASS 1] Cache BYPASSED, use_cache={use_cache}, force_llm={force_llm}")
 
     api_key = os.environ.get("OPENROUTER_API_KEY")
 
