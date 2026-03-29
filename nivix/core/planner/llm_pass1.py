@@ -209,6 +209,26 @@ def _heuristic_fallback_pass1(prompt: str) -> dict:
         ]
         reasoning = "Derivatives require showing the secant → tangent transformation as Δx → 0."
         
+    elif any(w in content for w in ["gravity", "gravitational", "newton", "force", "mass"]):
+        nodes = [
+            {"id": "earth", "type": "shape", "label": "Earth", "lifecycle": {"spawn": 0}},
+            {"id": "apple", "type": "object", "label": "Falling Apple", "lifecycle": {"spawn": 30}},
+            {"id": "force_arrow", "type": "highlight", "label": "F = ma", "lifecycle": {"spawn": 60}},
+            {"id": "trajectory", "type": "shape", "label": "Motion Path", "lifecycle": {"spawn": 90}},
+            {"id": "newton_label", "type": "text", "label": "Newton's Law", "lifecycle": {"spawn": 120}}
+        ]
+        reasoning = "Gravity: show mass → force → motion to demonstrate F = ma."
+        
+    elif any(w in content for w in ["prime", "primary number", "primality"]):
+        nodes = [
+            {"id": "number_line", "type": "plot", "label": "Number Line", "lifecycle": {"spawn": 0}},
+            {"id": "sieve", "type": "highlight", "label": "Sieve of Eratosthenes", "lifecycle": {"spawn": 30}},
+            {"id": "prime_highlight", "type": "highlight", "label": "Prime Numbers", "lifecycle": {"spawn": 60}},
+            {"id": "composite_cross", "type": "highlight", "label": "Composite Numbers", "lifecycle": {"spawn": 90}},
+            {"id": "divisibility", "type": "math", "label": "Only 1 and itself", "lifecycle": {"spawn": 120}}
+        ]
+        reasoning = "Prime numbers: sieve out composites to reveal primes uniquely."
+        
     else:
         # Generic concept decomposition
         words = [w for w in prompt.split() if len(w) > 3][:3]
