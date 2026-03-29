@@ -103,11 +103,15 @@ def run_pass1_nodes(prompt: str, use_cache: bool = True) -> dict:
     print(f"[PASS 1] API key present: {bool(api_key)}")
     
     if api_key:
-        print(f"[PASS 1] Key prefix: {api_key[:20]}...")
-        result = _run_openrouter_pass1(prompt, api_key)
+        print(f"[PASS 1] Key found, attempting LLM call...")
+        try:
+            result = _run_openrouter_pass1(prompt, api_key)
+            print(f"[PASS 1] Result source: {result.get('source')}")
+        except Exception as e:
+            print(f"[PASS 1] LLM call FAILED: {e}")
+            result = _heuristic_fallback_pass1(prompt)
     else:
-        print("[PASS 1] No OPENROUTER_API_KEY found. Using heuristic fallback.")
-        print("[PASS 1] To enable LLM: Set OPENROUTER_API_KEY env var at openrouter.ai")
+        print("[PASS 1] No OPENROUTER_API_KEY. Using fallback.")
         result = _heuristic_fallback_pass1(prompt)
 
     _write_cache(cache_key, result)
