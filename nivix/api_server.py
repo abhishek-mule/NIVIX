@@ -7,13 +7,13 @@ import uvicorn
 
 # Import the new strict v4.0 CIR Validator
 try:
-    from core.validator.cir_validator import validate_cir
+    from nivix.core.validator.cir_validator import validate_cir
 except ImportError:
     print("Warning: Could not import cir_validator.")
     def validate_cir(data):
         return True, "Mock validation pass"
 
-from core.planner.llm_pass1 import run_pass1_nodes
+from nivix.core.planner.llm_pass1 import run_pass1_nodes
 
 app = FastAPI(title="Nivix Rendering & Reasoning API", version="4.0")
 
