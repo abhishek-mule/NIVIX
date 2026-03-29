@@ -229,6 +229,55 @@ def _heuristic_fallback_pass1(prompt: str) -> dict:
         ]
         reasoning = "Prime numbers: sieve out composites to reveal primes uniquely."
         
+    elif any(w in content for w in ["pythagorean", "pythagoras", "a²+b²", "right triangle"]):
+        nodes = [
+            {"id": "triangle", "type": "shape", "label": "Right Triangle", "lifecycle": {"spawn": 0}},
+            {"id": "leg_a", "type": "shape", "label": "Leg a", "lifecycle": {"spawn": 30}},
+            {"id": "leg_b", "type": "shape", "label": "Leg b", "lifecycle": {"spawn": 45}},
+            {"id": "hypotenuse", "type": "shape", "label": "Hypotenuse c", "lifecycle": {"spawn": 60}},
+            {"id": "formula", "type": "math", "label": "a² + b² = c²", "lifecycle": {"spawn": 90}}
+        ]
+        reasoning = "Pythagorean theorem: show squares on legs combine to equal square on hypotenuse."
+        
+    elif any(w in content for w in ["sine", "cosine", "tan", "trigonometry", "trig", "sohcahtoa"]):
+        nodes = [
+            {"id": "unit_circle", "type": "shape", "label": "Unit Circle", "lifecycle": {"spawn": 0}},
+            {"id": "angle_theta", "type": "highlight", "label": "Angle θ", "lifecycle": {"spawn": 30}},
+            {"id": "sin_segment", "type": "highlight", "label": "Sine (opposite/hypotenuse)", "lifecycle": {"spawn": 60}},
+            {"id": "cos_segment", "type": "highlight", "label": "Cosine (adjacent/hypotenuse)", "lifecycle": {"spawn": 80}},
+            {"id": "tan_segment", "type": "highlight", "label": "Tangent (opposite/adjacent)", "lifecycle": {"spawn": 100}}
+        ]
+        reasoning = "Trigonometry: show angle relationships in the unit circle."
+        
+    elif any(w in content for w in ["integration", "integral", "area under", "antiderivative"]):
+        nodes = [
+            {"id": "curve", "type": "plot", "label": "f(x) Curve", "lifecycle": {"spawn": 0}},
+            {"id": "region", "type": "shape", "label": "Region Under Curve", "lifecycle": {"spawn": 30}},
+            {"id": "riemann_sum", "type": "shape", "label": "Riemann Sum", "lifecycle": {"spawn": 60}},
+            {"id": "integral_label", "type": "math", "label": "∫f(x)dx", "lifecycle": {"spawn": 90}},
+            {"id": "area_result", "type": "text", "label": "Signed Area", "lifecycle": {"spawn": 120}}
+        ]
+        reasoning = "Integrals: approximate infinite rectangles to find exact area."
+        
+    elif any(w in content for w in ["matrix", "matrices", "determinant", "eigenvalue"]):
+        nodes = [
+            {"id": "matrix_2x2", "type": "math", "label": "2×2 Matrix", "lifecycle": {"spawn": 0}},
+            {"id": "determinant", "type": "math", "label": "det(A) = ad - bc", "lifecycle": {"spawn": 30}},
+            {"id": "transformation", "type": "shape", "label": "Linear Transformation", "lifecycle": {"spawn": 60}},
+            {"id": "eigenvector", "type": "highlight", "label": "Eigenvector (unchanged direction)", "lifecycle": {"spawn": 90}},
+            {"id": "eigenvalue", "type": "math", "label": "Av = λv", "lifecycle": {"spawn": 120}}
+        ]
+        reasoning = "Matrices: show how they transform space and when vectors stay fixed."
+        
+    elif any(w in content for w in ["fourier", "frequency", "wave", "signal"]):
+        nodes = [
+            {"id": "time_wave", "type": "plot", "label": "Time Domain Wave", "lifecycle": {"spawn": 0}},
+            {"id": "transform_icon", "type": "highlight", "label": "Fourier Transform", "lifecycle": {"spawn": 40}},
+            {"id": "freq_bars", "type": "plot", "label": "Frequency Components", "lifecycle": {"spawn": 80}},
+            {"id": "reconstruction", "type": "plot", "label": "Reconstructed Wave", "lifecycle": {"spawn": 120}}
+        ]
+        reasoning = "Fourier: decompose complex wave into simple frequencies."
+        
     else:
         # Generic concept decomposition
         words = [w for w in prompt.split() if len(w) > 3][:3]
