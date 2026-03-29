@@ -127,6 +127,21 @@ app.add_middleware(
 class CompileRequest(BaseModel):
     prompt: str = ""
     expression: str = ""
+    text: str = ""
+    input: str = ""
+    query: str = ""
+    query_: str = ""
+    
+    def get_content(self) -> str:
+        """Get content from any available field."""
+        return (
+            self.expression or 
+            self.prompt or 
+            self.text or 
+            self.input or 
+            self.query or 
+            self.query_
+        )
 
 def generate_v4_cir(prompt: str) -> dict:
     """
@@ -241,15 +256,18 @@ async def compile_endpoint(request: CompileRequest):
     Main Compilation Endpoint.
     Consumes a prompt OR expression, generates Execution Graph (CIR), validates against strict Schema.
     """
-    # Handle expression input
-    if request.expression and request.expression.strip():
-        print(f"--- [API] Received Expression: '{request.expression}' ---")
-        cir = parse_expression(request.expression)
-    elif request.prompt and request.prompt.strip():
-        print(f"--- [API] Received Prompt: '{request.prompt}' ---")
-        cir = generate_v4_cir(request.prompt)
+    # Handle expression input - unified handler
+    content = request.get_content()
+    if not content or not content.strip():
+        raise HTTPException(status_code=400, detail={"error": "Content required (use expression, prompt, text, input, or query)"})
+    
+    # Use expression parser if it looks like math, otherwise prompt
+    if re.match(r"^\([a-z]\+[a-z]", content, re.IGNORECASE):
+        print(f"--- [API] Received Expression: '{content}' ---")
+        cir = parse_expression(content)
     else:
-        raise HTTPException(status_code=400, detail={"error": "Either prompt or expression required"})
+        print(f"--- [API] Received Prompt: '{content}' ---")
+        cir = generate_v4_cir(content)
     
     # 2. Strict Schema Validation
     is_valid, error_msg = validate_cir(cir)
