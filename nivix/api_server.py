@@ -1,9 +1,15 @@
 import time
 import json
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
+
+# Check environment on startup
+API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+print(f"=== SERVER STARTUP: API_KEY present: {bool(API_KEY)} ===")
+print(f"=== SERVER STARTUP: Key starts with: {API_KEY[:20] if API_KEY else 'NONE'} ===")
 
 # Import the new strict v4.0 CIR Validator
 try:
