@@ -89,10 +89,14 @@ def run_pass1_nodes(prompt: str) -> dict:
 
     api_key = os.environ.get("OPENROUTER_API_KEY")
 
+    print(f"[PASS 1] API key present: {bool(api_key)}")
+    
     if api_key:
+        print(f"[PASS 1] Key prefix: {api_key[:20]}...")
         result = _run_openrouter_pass1(prompt, api_key)
     else:
         print("[PASS 1] No OPENROUTER_API_KEY found. Using heuristic fallback.")
+        print("[PASS 1] To enable LLM: Set OPENROUTER_API_KEY env var at openrouter.ai")
         result = _heuristic_fallback_pass1(prompt)
 
     _write_cache(cache_key, result)
@@ -151,6 +155,8 @@ def _run_openrouter_pass1(prompt: str, api_key: str) -> dict:
             parsed["source"] = f"openrouter/{model}"
             parsed["latency_ms"] = latency_ms
             print(f"[PASS 1] SUCCESS via {model} in {latency_ms}ms")
+            print(f"[PASS 1] Nodes generated: {len(parsed.get('nodes', []))}")
+            print(f"[PASS 1] First node: {parsed.get('nodes', [{}])[0].get('id', 'N/A')}")
             return parsed
 
         except urllib.error.HTTPError as e:
