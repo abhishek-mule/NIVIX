@@ -24,6 +24,7 @@ class Symbol:
     children: List[str] = field(default_factory=list)
     properties: Dict[str, Any] = field(default_factory=dict)
 
+
 class SymbolGraphNormalizer:
     """
     Normalizes symbol graph to canonical form.

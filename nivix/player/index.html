@@ -1,481 +1,788 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Nivix — Cinematic Reasoning Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #060810;
-      --surface: #0c1424;
-      --surface-raised: #131d30;
-      --border: #1e2a42;
-      --border-focus: #3b82f6;
-      --accent: #3b82f6;
-      --accent-hover: #60a5fa;
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --error: #ef4444;
-      --text: #e8ecf4;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --radius: 8px;
-      --radius-lg: 12px;
+      --ink: #0f0f11;
+      --ink-2: #3a3a3f;
+      --ink-3: #6b6b74;
+      --ink-4: #a0a0aa;
+      --line: #e4e4e8;
+      --line-2: #f0f0f3;
+      --surface: #ffffff;
+      --surface-2: #f7f7fa;
+      --blue: #2563eb;
+      --blue-dim: #dbeafe;
+      --blue-muted: #93c5fd;
+      --green: #16a34a;
+      --green-dim: #dcfce7;
+      --amber: #d97706;
+      --amber-dim: #fef3c7;
+      --red: #dc2626;
+      --red-dim: #fee2e2;
+      --radius-sm: 6px;
+      --radius: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 22px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --ink: #f0f0f4;
+        --ink-2: #c8c8d0;
+        --ink-3: #8888a0;
+        --ink-4: #55556a;
+        --line: #2a2a35;
+        --line-2: #1e1e28;
+        --surface: #141418;
+        --surface-2: #1a1a22;
+        --blue: #60a5fa;
+        --blue-dim: #1e3a5f;
+        --blue-muted: #3b82f6;
+        --green: #4ade80;
+        --green-dim: #14532d;
+        --amber: #fbbf24;
+        --amber-dim: #78350f;
+        --red: #f87171;
+        --red-dim: #7f1d1d;
+      }
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--surface);
+      color: var(--ink);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Skip Link for Accessibility */
+    /* ── Skip link ── */
     .skip-link {
       position: absolute;
-      top: -100px;
-      left: 16px;
-      background: var(--accent);
+      top: -200px;
+      left: 12px;
+      background: var(--blue);
       color: #fff;
-      padding: 12px 24px;
+      padding: 10px 18px;
       border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
       z-index: 9999;
       text-decoration: none;
-      font-weight: 600;
+      transition: top .2s;
     }
+
     .skip-link:focus {
-      top: 16px;
+      top: 12px;
     }
 
-    /* Progress Bar */
-    .workflow-progress {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 24px;
-    }
-    .progress-track {
-      display: flex;
-      align-items: center;
-      gap: 0;
-    }
-    .progress-step {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      position: relative;
-    }
-    .progress-step:not(:last-child)::after {
-      content: '';
-      flex: 1;
-      height: 2px;
-      background: var(--border);
-      margin: 0 8px;
-    }
-    .progress-step.completed:not(:last-child)::after {
-      background: var(--success);
-    }
-    .step-indicator {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--surface-raised);
-      border: 2px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      transition: all 0.3s ease;
-      flex-shrink: 0;
-    }
-    .step-indicator.active {
-      border-color: var(--accent);
-      background: var(--accent);
-      color: #fff;
-      animation: pulse 1.5s infinite;
-    }
-    .step-indicator.completed {
-      border-color: var(--success);
-      background: var(--success);
-      color: #fff;
-    }
-    .step-label {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-muted);
-      white-space: nowrap;
-    }
-    .step-label.active { color: var(--text); }
-    .step-label.completed { color: var(--success); }
-    .progress-percentage {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      min-width: 48px;
-      text-align: right;
-    }
-
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
-
-    /* Header */
-    header {
+    /* ── Header ── */
+    .site-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 24px;
-      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      border-bottom: 1px solid var(--line);
       background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    .logo {
+
+    .wordmark {
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 17px;
+      font-weight: 600;
       letter-spacing: -0.3px;
+      color: var(--ink);
+      text-decoration: none;
     }
-    .logo-icon {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, var(--accent), #8b5cf6);
-      border-radius: var(--radius);
+
+    .wordmark-glyph {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: var(--ink);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
-    }
-    .version-badge {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--accent);
-      background: rgba(59,130,246,0.15);
-      border: 1px solid rgba(59,130,246,0.25);
-      padding: 3px 10px;
-      border-radius: 20px;
+      flex-shrink: 0;
     }
 
-    /* API Status - Enhanced with health/response time */
-    .api-status {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 13px;
+    .wordmark-glyph svg {
+      width: 14px;
+      height: 14px;
     }
-    .status-indicator {
+
+    .header-right {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 12px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      background: var(--surface-raised);
-    }
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--text-muted);
-    }
-    .status-indicator.online .status-dot {
-      background: var(--success);
-      box-shadow: 0 0 8px var(--success);
-    }
-    .status-indicator.offline .status-dot {
-      background: var(--error);
-    }
-    .status-indicator.connecting .status-dot {
-      background: var(--warning);
-      animation: pulse 1s infinite;
-    }
-    .status-text {
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-    .status-latency {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text-muted);
-      padding: 4px 8px;
-      background: var(--surface);
-      border-radius: 4px;
     }
 
-    /* Main Layout */
-    .app {
-      display: grid;
-      grid-template-columns: 400px 1fr;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    /* Input Panel */
-    .input-panel {
-      background: var(--surface);
-      border-right: 1px solid var(--border);
+    /* ── API Pill ── */
+    .api-pill {
       display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-    .panel-section {
-      padding: 20px;
-      border-bottom: 1px solid var(--border);
-    }
-    .section-title {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      margin-bottom: 12px;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      font-size: 13px;
+      color: var(--ink-2);
+      cursor: default;
+      transition: border-color .2s;
     }
 
-    /* Prompt Area - Clean like Gemini */
-    .prompt-area {
-      padding: 20px;
+    .api-pill:hover {
+      border-color: var(--ink-4);
     }
-    .prompt-label {
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 8px;
-      display: block;
+
+    .api-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--ink-4);
+      transition: background .3s, box-shadow .3s;
+      flex-shrink: 0;
     }
-    .prompt-textarea {
-      width: 100%;
-      min-height: 120px;
-      background: var(--surface-raised);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      color: var(--text);
-      font-family: inherit;
-      font-size: 14px;
-      line-height: 1.6;
-      padding: 14px;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+
+    .api-dot.online {
+      background: var(--green);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 20%, transparent);
     }
-    .prompt-textarea:focus {
-      border-color: var(--border-focus);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+
+    .api-dot.connecting {
+      background: var(--amber);
+      animation: blink 1s infinite;
     }
-    .prompt-textarea::placeholder {
-      color: var(--text-muted);
+
+    .api-dot.offline {
+      background: var(--red);
     }
-    .prompt-hint {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 8px;
+
+    .api-latency {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--ink-4);
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--line-2);
+    }
+
+    /* ── Model badge ── */
+    .model-badge {
       display: flex;
       align-items: center;
       gap: 6px;
-    }
-    .prompt-hint kbd {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      background: var(--surface-raised);
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-3);
+      background: var(--surface-2);
+      cursor: default;
     }
 
-    /* Submit Button */
-    .submit-btn {
-      margin: 0 20px;
-      padding: 14px 0;
-      background: linear-gradient(135deg, var(--accent), #8b5cf6);
-      border: none;
-      border-radius: var(--radius-lg);
-      color: #fff;
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
+    .model-badge-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      background: var(--blue-dim);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      transition: opacity 0.2s, transform 0.15s;
+      flex-shrink: 0;
     }
-    .submit-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
-    .submit-btn:active:not(:disabled) { transform: translateY(0); }
-    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Model Info - LLM Transparency */
-    .model-info {
-      padding: 20px;
+    .model-badge-icon svg {
+      width: 9px;
+      height: 9px;
+      fill: var(--blue);
     }
-    .model-card {
-      background: var(--surface-raised);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 14px;
-    }
-    .model-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-    .model-source {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    .model-params {
-      display: flex;
-      gap: 12px;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-    }
-    .param {
-      font-size: 11px;
-    }
-    .param-label { color: var(--text-muted); }
-    .param-value { font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
 
-    /* Results Section */
-    .results-section {
+    /* ── Layout ── */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
       flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: none;
+      overflow: hidden;
+      height: calc(100vh - 56px);
     }
-    .results-section.visible { display: block; }
 
-    .result-card {
-      background: var(--surface-raised);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 14px;
-      margin-bottom: 12px;
+    /* ── Left Panel ── */
+    .left-panel {
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: var(--surface);
     }
-    .result-label {
+
+    /* ── Prompt zone ── */
+    .prompt-zone {
+      padding: 28px 24px 20px;
+    }
+
+    .prompt-eyebrow {
       font-size: 11px;
       font-weight: 600;
+      letter-spacing: .08em;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      margin-bottom: 4px;
+      color: var(--ink-4);
+      margin-bottom: 10px;
     }
-    .result-value {
-      font-size: 14px;
-      font-weight: 500;
-    }
-    .result-value.success { color: var(--success); }
-    .result-value.warning { color: var(--warning); }
 
-    /* JSON Inspector - Collapsible */
-    .json-inspector {
-      background: var(--surface-raised);
-      border: 1px solid var(--border);
+    .prompt-box {
+      position: relative;
+      border: 1px solid var(--line);
       border-radius: var(--radius-lg);
-      overflow: hidden;
+      background: var(--surface-2);
+      transition: border-color .2s, box-shadow .2s;
     }
-    .json-header {
+
+    .prompt-box:focus-within {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 12%, transparent);
+      background: var(--surface);
+    }
+
+    .prompt-textarea {
+      width: 100%;
+      min-height: 110px;
+      padding: 14px 16px 52px;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--ink);
+    }
+
+    .prompt-textarea::placeholder {
+      color: var(--ink-4);
+    }
+
+    .prompt-actions {
+      position: absolute;
+      bottom: 10px;
+      left: 12px;
+      right: 10px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 14px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
     }
-    .json-header:hover { background: var(--surface-raised); }
-    .json-header h4 {
-      font-size: 12px;
-      font-weight: 600;
-    }
-    .json-toggle {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    .json-content {
-      max-height: 250px;
-      overflow-y: auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      line-height: 1.7;
-      padding: 12px;
-      white-space: pre-wrap;
-      word-break: break-all;
-      display: none;
-    }
-    .json-content.visible { display: block; }
-    .json-key { color: #7dd3fc; }
-    .json-str { color: #86efac; }
-    .json-num { color: #fbbf24; }
-    .json-bool { color: #f472b6; }
 
-    /* Canvas Area */
-    .canvas-area {
+    .prompt-hint-text {
+      font-size: 12px;
+      color: var(--ink-4);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .prompt-hint-text kbd {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--ink-3);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .run-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      background: var(--ink);
+      color: var(--surface);
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+    }
+
+    .run-btn:hover:not(:disabled) {
+      opacity: .85;
+    }
+
+    .run-btn:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    .run-btn:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    .run-btn-icon {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* ── Progress ── */
+    .progress-section {
+      padding: 0 24px 24px;
+    }
+
+    .progress-track {
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      background: var(--bg);
+      gap: 0;
     }
 
-    /* View Selector */
-    .view-toolbar {
+    .progress-step-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      position: relative;
+    }
+
+    .progress-step-row:not(:last-child) .step-spine {
+      position: absolute;
+      left: 11px;
+      top: 26px;
+      width: 1px;
+      height: calc(100% - 4px);
+      background: var(--line);
+      transition: background .4s;
+    }
+
+    .progress-step-row.completed .step-spine {
+      background: var(--green);
+    }
+
+    .step-dot {
+      width: 23px;
+      height: 23px;
+      border-radius: 50%;
+      border: 1.5px solid var(--line);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-4);
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: all .3s;
+    }
+
+    .progress-step-row.active .step-dot {
+      border-color: var(--blue);
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--blue) 15%, transparent);
+      animation: pulse-dot 2s infinite;
+    }
+
+    .progress-step-row.completed .step-dot {
+      border-color: var(--green);
+      background: var(--green);
+      color: #fff;
+    }
+
+    @keyframes pulse-dot {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 15%, transparent)
+      }
+
+      50% {
+        box-shadow: 0 0 0 6px color-mix(in srgb, var(--blue) 8%, transparent)
+      }
+    }
+
+    .step-body {
+      flex: 1;
+      padding-bottom: 18px;
+    }
+
+    .step-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-3);
+      transition: color .3s;
+    }
+
+    .progress-step-row.active .step-name {
+      color: var(--ink);
+    }
+
+    .progress-step-row.completed .step-name {
+      color: var(--green);
+    }
+
+    .step-sub {
+      font-size: 12px;
+      color: var(--ink-4);
+      margin-top: 2px;
+      display: none;
+    }
+
+    .progress-step-row.active .step-sub {
+      display: block;
+    }
+
+    /* ── Progress bar strip ── */
+    .progress-bar-wrap {
+      margin: 0 24px 20px;
+      height: 3px;
+      border-radius: 99px;
+      background: var(--line);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--blue);
+      width: 0%;
+      transition: width .5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-bar-fill.complete {
+      background: var(--green);
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: var(--line);
+      margin: 0 24px;
+    }
+
+    /* ── Model card ── */
+    .model-section {
+      padding: 20px 24px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--ink-4);
+      margin-bottom: 12px;
+    }
+
+    .model-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      background: var(--surface-2);
+    }
+
+    .model-card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .model-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: var(--blue-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .model-logo svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .model-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .model-card-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .model-card-provider {
+      font-size: 12px;
+      color: var(--ink-3);
+      margin-top: 1px;
+    }
+
+    .model-pill {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--blue-dim);
+      color: var(--blue);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .model-params {
+      display: flex;
+      gap: 16px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .mparam {
+      font-size: 12px;
+    }
+
+    .mparam-label {
+      color: var(--ink-4);
+    }
+
+    .mparam-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--ink-2);
+      margin-top: 1px;
+    }
+
+    /* ── Results strip ── */
+    .results-section {
+      padding: 20px 24px;
+      display: none;
+    }
+
+    .results-section.visible {
+      display: block;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .result-tile {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+    }
+
+    .result-tile-label {
+      font-size: 11px;
+      color: var(--ink-4);
+    }
+
+    .result-tile-val {
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 2px;
+      font-family: 'DM Mono', monospace;
+      color: var(--ink);
+    }
+
+    .result-tile-val.ok {
+      color: var(--green);
+    }
+
+    .result-tile-val.warn {
+      color: var(--amber);
+    }
+
+    .result-tile-val.err {
+      color: var(--red);
+    }
+
+    /* ── CIR disclosure ── */
+    .cir-section {
+      padding: 0 24px 24px;
+    }
+
+    .cir-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-3);
+      cursor: pointer;
+      text-align: left;
+      transition: background .15s;
+    }
+
+    .cir-toggle:hover {
+      background: var(--line-2);
+    }
+
+    .cir-toggle-icon {
+      margin-left: auto;
+      color: var(--ink-4);
+      transition: transform .2s;
+    }
+
+    .cir-toggle[aria-expanded="true"] .cir-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .cir-body {
+      display: none;
+      margin-top: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+
+    .cir-body.open {
+      display: block;
+    }
+
+    .cir-body pre {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      line-height: 1.7;
+      color: var(--ink-2);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .jk {
+      color: #60a5fa;
+    }
+
+    .jv {
+      color: #34d399;
+    }
+
+    .jn {
+      color: #fbbf24;
+    }
+
+    .jb {
+      color: #f472b6;
+    }
+
+    /* ── Right canvas ── */
+    .canvas-panel {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface-2);
+      overflow: hidden;
+    }
+
+    /* ── View tabs ── */
+    .canvas-toolbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 12px 20px;
-      border-bottom: 1px solid var(--border);
       background: var(--surface);
+      border-bottom: 1px solid var(--line);
     }
+
     .view-tabs {
       display: flex;
       gap: 4px;
     }
-    .view-tab {
-      padding: 8px 14px;
-      border-radius: var(--radius);
+
+    .vtab {
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
       border: 1px solid transparent;
       background: transparent;
-      color: var(--text-secondary);
-      font-family: inherit;
+      font-family: 'DM Sans', sans-serif;
       font-size: 13px;
       font-weight: 500;
+      color: var(--ink-3);
       cursor: pointer;
-      transition: all 0.2s;
-    }
-    .view-tab:hover { color: var(--text); }
-    .view-tab[aria-current="true"] {
-      background: rgba(59,130,246,0.15);
-      border-color: var(--border-focus);
-      color: var(--accent);
-    }
-    .frame-info {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text-muted);
-      background: var(--surface-raised);
-      padding: 5px 10px;
-      border-radius: var(--radius);
+      transition: all .15s;
     }
 
-    /* Canvas Wrapper */
-    .canvas-wrapper {
+    .vtab:hover {
+      color: var(--ink);
+      background: var(--surface-2);
+    }
+
+    .vtab.active {
+      background: var(--blue-dim);
+      color: var(--blue);
+      border-color: var(--blue-muted);
+    }
+
+    .frame-readout {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--ink-4);
+      padding: 5px 10px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+    }
+
+    /* ── Canvas ── */
+    .canvas-wrap {
       flex: 1;
       position: relative;
       overflow: hidden;
     }
+
     canvas {
       display: block;
       width: 100%;
       height: 100%;
     }
 
-    /* Empty State */
+    /* ── Empty state ── */
     .empty-state {
       position: absolute;
       inset: 0;
@@ -483,872 +790,939 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 16px;
+      pointer-events: none;
     }
-    .empty-state.hidden { display: none; }
+
+    .empty-state.gone {
+      display: none;
+    }
+
     .empty-icon {
-      font-size: 48px;
-      opacity: 0.2;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: var(--line-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: .5;
     }
-    .empty-text {
-      font-size: 14px;
-      color: var(--text-muted);
+
+    .empty-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: var(--ink-3);
+    }
+
+    .empty-heading {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ink-3);
+    }
+
+    .empty-body {
+      font-size: 13px;
+      color: var(--ink-4);
       text-align: center;
-      max-width: 280px;
+      max-width: 260px;
       line-height: 1.6;
     }
 
-    /* Loading Overlay */
+    /* ── Loading overlay ── */
     .loading-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(6,8,16,0.9);
       display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 14px;
+      background: color-mix(in srgb, var(--surface-2) 92%, transparent);
       backdrop-filter: blur(4px);
     }
-    .loading-overlay.visible { display: flex; }
-    .loading-spinner {
-      width: 44px;
-      height: 44px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text {
-      font-size: 14px;
-      color: var(--text-muted);
+
+    .loading-overlay.on {
+      display: flex;
     }
 
-    /* Timeline */
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2.5px solid var(--line);
+      border-top-color: var(--blue);
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-msg {
+      font-size: 13px;
+      color: var(--ink-3);
+      font-weight: 500;
+    }
+
+    /* ── Timeline ── */
     .timeline {
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 14px 20px;
-      border-top: 1px solid var(--border);
+      padding: 12px 20px;
       background: var(--surface);
+      border-top: 1px solid var(--line);
     }
+
     .play-btn {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      background: var(--ink);
+      color: var(--surface);
       border: none;
-      color: #fff;
-      font-size: 14px;
+      font-size: 12px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.15s, box-shadow 0.2s;
       flex-shrink: 0;
+      transition: opacity .15s, transform .1s;
     }
-    .play-btn:hover { transform: scale(1.05); box-shadow: 0 0 16px rgba(59,130,246,0.4); }
+
+    .play-btn:hover:not(:disabled) {
+      opacity: .8;
+    }
+
+    .play-btn:active:not(:disabled) {
+      transform: scale(.95);
+    }
+
+    .play-btn:disabled {
+      opacity: .3;
+      cursor: not-allowed;
+    }
+
+    .play-btn svg {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+    }
+
     .scrubber {
       flex: 1;
-      height: 6px;
+      height: 4px;
       appearance: none;
-      background: var(--surface-raised);
-      border-radius: 6px;
-      cursor: pointer;
+      border-radius: 99px;
+      background: var(--line);
       outline: none;
+      cursor: pointer;
     }
+
     .scrubber::-webkit-slider-thumb {
       appearance: none;
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
-      background: #fff;
-      box-shadow: 0 0 0 3px var(--accent);
+      background: var(--ink);
       cursor: grab;
+      border: 2px solid var(--surface);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
     }
 
-    /* Tooltips */
-    .tooltip {
-      position: relative;
+    .scrubber:disabled {
+      opacity: .3;
+      cursor: not-allowed;
     }
-    .tooltip::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--surface-raised);
-      border: 1px solid var(--border);
-      padding: 6px 10px;
-      border-radius: var(--radius);
-      font-size: 12px;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-    }
-    .tooltip:hover::after { opacity: 1; }
 
-    /* Toast Notifications */
+    /* ── Toast ── */
     .toast {
       position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: var(--surface-raised);
-      border: 1px solid var(--border);
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 16px;
       border-radius: var(--radius-lg);
-      padding: 12px 20px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .12);
       display: flex;
       align-items: center;
-      gap: 10px;
-      z-index: 1000;
-      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.35s;
+      gap: 8px;
       opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .25s, transform .25s;
+      z-index: 999;
+      pointer-events: none;
+      max-width: 320px;
     }
+
     .toast.show {
-      transform: translateX(-50%) translateY(0);
       opacity: 1;
-    }
-    .toast.success { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.1); }
-    .toast.error { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.1); }
-    .toast.info { border-color: var(--border-focus); background: rgba(59,130,246,0.1); }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-    /* Focus states for accessibility */
-    *:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 2px;
+      transform: translateY(0);
     }
 
-    /* Hidden utility */
-    .visually-hidden {
+    .toast-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .toast.success .toast-dot {
+      background: var(--green);
+    }
+
+    .toast.error .toast-dot {
+      background: var(--red);
+    }
+
+    .toast.info .toast-dot {
+      background: var(--blue);
+    }
+
+    /* ── Tooltip ── */
+    [data-tip] {
+      position: relative;
+    }
+
+    [data-tip]:hover::after {
+      content: attr(data-tip);
       position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0,0,0,0);
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--ink);
+      color: var(--surface);
+      font-size: 11px;
       white-space: nowrap;
-      border: 0;
+      padding: 5px 8px;
+      border-radius: var(--radius-sm);
+      pointer-events: none;
+    }
+
+    /* ── Focus visible ── */
+    :focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 2px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--line);
+      border-radius: 99px;
+    }
+
+    /* ── Animations ── */
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .4
+      }
+    }
+
+    @keyframes fadein {
+      from {
+        opacity: 0;
+        transform: translateY(4px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .fadein {
+      animation: fadein .25s ease;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+      }
+
+      .left-panel {
+        height: auto;
+        max-height: 45vh;
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .canvas-panel {
+        min-height: 55vh;
+      }
+
+      .header-right .model-badge {
+        display: none;
+      }
     }
   </style>
 </head>
+
 <body>
 
-<!-- Accessibility Skip Link -->
-<a href="#prompt-input" class="skip-link">Skip to prompt input</a>
+  <a href="#prompt-input" class="skip-link">Skip to prompt input</a>
 
-<!-- Workflow Progress Bar -->
-<nav class="workflow-progress" role="navigation" aria-label="Workflow progress">
-  <div class="progress-track" role="list">
-    <div class="progress-step" role="listitem">
-      <div class="step-indicator" id="step-compile">1</div>
-      <span class="step-label" id="label-compile">Compile</span>
-    </div>
-    <div class="progress-step" role="listitem">
-      <div class="step-indicator" id="step-validate">2</div>
-      <span class="step-label" id="label-validate">Validate</span>
-    </div>
-    <div class="progress-step" role="listitem">
-      <div class="step-indicator" id="step-render">3</div>
-      <span class="step-label" id="label-render">Render</span>
-    </div>
-    <div class="progress-step" role="listitem">
-      <div class="step-indicator" id="step-play">4</div>
-      <span class="step-label" id="label-play">Play</span>
-    </div>
-    <div class="progress-percentage" id="progress-pct">0%</div>
-  </div>
-</nav>
+  <!-- ── Header ── -->
+  <header class="site-header">
+    <a href="#" class="wordmark" aria-label="Nivix home">
+      <span class="wordmark-glyph" aria-hidden="true">
+        <svg viewBox="0 0 14 14" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="2,2 12,7 2,12" />
+        </svg>
+      </span>
+      Nivix
+    </a>
 
-<!-- Header -->
-<header>
-  <div class="logo">
-    <div class="logo-icon" aria-hidden="true">▶</div>
-    <span>Nivix</span>
-    <span class="version-badge">CIR v4.0</span>
-  </div>
-  
-  <!-- API Connection Status -->
-  <div class="api-status" role="status" aria-live="polite" aria-label="API connection status">
-    <div class="status-indicator" id="status-indicator">
-      <div class="status-dot" aria-hidden="true"></div>
-      <span class="status-text" id="status-text">Checking…</span>
-    </div>
-    <div class="status-latency" id="status-latency" aria-label="Response latency"></div>
-  </div>
-</header>
+    <div class="header-right">
+      <!-- Model badge -->
+      <div class="model-badge" data-tip="LLM powering this session" aria-label="Active model: Auto (Free Tier)">
+        <span class="model-badge-icon" aria-hidden="true">
+          <svg viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="1" width="3" height="3" rx="1" />
+            <rect x="5" y="1" width="3" height="3" rx="1" />
+            <rect x="1" y="5" width="3" height="3" rx="1" />
+            <rect x="5" y="5" width="3" height="3" rx="1" />
+          </svg>
+        </span>
+        <span id="hdr-model-name">Auto · Free Tier</span>
+      </div>
 
-<!-- Main App -->
-<main class="app" id="app-main">
-
-  <!-- Input Panel -->
-  <aside class="input-panel" role="complementary" aria-label="Input controls">
-    
-    <!-- Prompt Area -->
-    <div class="prompt-area">
-      <label for="prompt-input" class="prompt-label">What would you like to visualize?</label>
-      <textarea 
-        id="prompt-input" 
-        class="prompt-textarea"
-        placeholder="e.g. explain why imaginary numbers exist, show how RSA encryption works, demonstrate a derivative…"
-        rows="4"
-        aria-describedby="prompt-hint"
-      ></textarea>
-      <div class="prompt-hint" id="prompt-hint">
-        Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to submit
+      <!-- API status -->
+      <div class="api-pill" id="api-pill" role="status" aria-live="polite" aria-label="API connection status">
+        <span class="api-dot" id="api-dot" aria-hidden="true"></span>
+        <span id="api-status-text">Checking…</span>
+        <span class="api-latency" id="api-latency" aria-label="Latency"></span>
       </div>
     </div>
+  </header>
 
-    <!-- Submit Button -->
-    <button 
-      class="submit-btn" 
-      id="submit-btn"
-      onclick="compileCIR()"
-      aria-label="Compile and visualize prompt"
-    >
-      <span id="btn-icon">▶</span>
-      <span id="btn-text">Compile & Visualize</span>
-    </button>
+  <!-- ── App ── -->
+  <div class="app-layout">
 
-    <!-- Model Transparency -->
-    <div class="model-info">
-      <div class="section-title">LLM Model</div>
-      <div class="model-card">
-        <div class="model-name" id="model-name">Auto (Free Fallback)</div>
-        <div class="model-source" id="model-source">OpenRouter Free Tier</div>
-        <div class="model-params">
-          <span class="param">
-            <span class="param-label">Temp:</span>
-            <span class="param-value">0.3</span>
-          </span>
-          <span class="param">
-            <span class="param-label">Max:</span>
-            <span class="param-value">800</span>
-          </span>
+    <!-- ── Left panel ── -->
+    <aside class="left-panel" aria-label="Input and controls">
+
+      <!-- Prompt -->
+      <div class="prompt-zone">
+        <div class="prompt-eyebrow" aria-hidden="true">Describe what to visualize</div>
+        <div class="prompt-box">
+          <textarea id="prompt-input" class="prompt-textarea"
+            placeholder="e.g. why imaginary numbers exist, how RSA encryption works, explain derivatives…" rows="4"
+            aria-label="Visualization prompt" aria-describedby="prompt-hint" spellcheck="false"></textarea>
+          <div class="prompt-actions">
+            <span class="prompt-hint-text" id="prompt-hint" aria-live="polite">
+              <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to run
+            </span>
+            <button class="run-btn" id="run-btn" onclick="compileCIR()" aria-label="Compile and visualize prompt">
+              <svg class="run-btn-icon" viewBox="0 0 14 14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polygon points="2,1 13,7 2,13" />
+              </svg>
+              <span id="run-btn-text">Compile</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Results (hidden until compile) -->
-    <div class="results-section" id="results-section">
-      <div class="section-title">Results</div>
-      
-      <div class="result-card">
-        <div class="result-label">Status</div>
-        <div class="result-value" id="result-status">—</div>
+      <!-- Progress -->
+      <div class="progress-section" aria-label="Workflow progress">
+        <div class="section-label" id="progress-section-label">Pipeline</div>
+        <div class="progress-bar-wrap" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+          aria-label="Overall progress" id="prog-bar-wrap">
+          <div class="progress-bar-fill" id="prog-bar"></div>
+        </div>
+        <div class="progress-track" role="list">
+          <div class="progress-step-row" id="pstep-0" role="listitem">
+            <div class="step-spine" aria-hidden="true"></div>
+            <div class="step-dot" id="pdot-0" aria-hidden="true">1</div>
+            <div class="step-body">
+              <div class="step-name">Compile</div>
+              <div class="step-sub" id="psub-0">Sending prompt to CIR engine…</div>
+            </div>
+          </div>
+          <div class="progress-step-row" id="pstep-1" role="listitem">
+            <div class="step-spine" aria-hidden="true"></div>
+            <div class="step-dot" id="pdot-1" aria-hidden="true">2</div>
+            <div class="step-body">
+              <div class="step-name">Validate</div>
+              <div class="step-sub" id="psub-1">Checking schema conformance…</div>
+            </div>
+          </div>
+          <div class="progress-step-row" id="pstep-2" role="listitem">
+            <div class="step-spine" aria-hidden="true"></div>
+            <div class="step-dot" id="pdot-2" aria-hidden="true">3</div>
+            <div class="step-body">
+              <div class="step-name">Render</div>
+              <div class="step-sub" id="psub-2">Building animation frames…</div>
+            </div>
+          </div>
+          <div class="progress-step-row" id="pstep-3" role="listitem">
+            <div class="step-dot" id="pdot-3" aria-hidden="true">4</div>
+            <div class="step-body">
+              <div class="step-name">Play</div>
+              <div class="step-sub" id="psub-3">Ready — press play below.</div>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <div class="result-card">
-        <div class="result-label">Nodes Generated</div>
-        <div class="result-value" id="result-nodes">—</div>
-      </div>
-      
-      <div class="result-card">
-        <div class="result-label">Confidence</div>
-        <div class="result-value" id="result-confidence">—</div>
-      </div>
-      
-      <div class="result-card">
-        <div class="result-label">Latency</div>
-        <div class="result-value" id="result-latency">—</div>
-      </div>
-    </div>
 
-    <!-- JSON Inspector -->
-    <div class="panel-section">
-      <div class="section-title">CIR Output</div>
-      <div class="json-inspector">
-        <button 
-          class="json-header" 
-          onclick="toggleJSON()"
-          aria-expanded="false"
-          id="json-toggle-btn"
-        >
-          <h4>View Raw CIR</h4>
-          <span class="json-toggle" id="json-toggle-icon">▼</span>
+      <div class="divider"></div>
+
+      <!-- Model info -->
+      <div class="model-section">
+        <div class="section-label">Active model</div>
+        <div class="model-card">
+          <div class="model-card-top">
+            <div class="model-logo" aria-hidden="true">
+              <svg viewBox="0 0 16 16" fill="var(--blue)" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="8" cy="8" r="5" fill="none" stroke="var(--blue)" stroke-width="1.5" />
+                <circle cx="8" cy="8" r="2" />
+              </svg>
+            </div>
+            <div class="model-card-info">
+              <div class="model-card-name" id="mc-name">Auto (Free Fallback)</div>
+              <div class="model-card-provider" id="mc-provider">OpenRouter Free Tier</div>
+            </div>
+            <div class="model-pill" id="mc-pill">Free</div>
+          </div>
+          <div class="model-params">
+            <div class="mparam">
+              <div class="mparam-label">Temperature</div>
+              <div class="mparam-val">0.3</div>
+            </div>
+            <div class="mparam">
+              <div class="mparam-label">Max tokens</div>
+              <div class="mparam-val">800</div>
+            </div>
+            <div class="mparam">
+              <div class="mparam-label">Endpoint</div>
+              <div class="mparam-val">/v1/messages</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Results -->
+      <div class="results-section" id="results-section" aria-label="Compile results">
+        <div class="section-label">Results</div>
+        <div class="results-grid">
+          <div class="result-tile">
+            <div class="result-tile-label">Nodes</div>
+            <div class="result-tile-val" id="r-nodes">—</div>
+          </div>
+          <div class="result-tile">
+            <div class="result-tile-label">Confidence</div>
+            <div class="result-tile-val" id="r-conf">—</div>
+          </div>
+          <div class="result-tile">
+            <div class="result-tile-label">Latency</div>
+            <div class="result-tile-val" id="r-lat">—</div>
+          </div>
+          <div class="result-tile">
+            <div class="result-tile-label">Status</div>
+            <div class="result-tile-val" id="r-status">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CIR JSON inspector -->
+      <div class="cir-section">
+        <button class="cir-toggle" id="cir-toggle-btn" aria-expanded="false" onclick="toggleCIR()"
+          aria-controls="cir-body">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+            <rect x="1" y="1" width="4" height="4" rx="1" />
+            <rect x="7" y="1" width="4" height="4" rx="1" />
+            <rect x="1" y="7" width="4" height="4" rx="1" />
+            <rect x="7" y="7" width="4" height="4" rx="1" />
+          </svg>
+          Raw CIR output
+          <span class="cir-toggle-icon" aria-hidden="true">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+              <path d="M2 3l3 3 3-3" />
+            </svg>
+          </span>
         </button>
-        <pre class="json-content" id="json-content" role="region" aria-label="CIR JSON output"></pre>
+        <div class="cir-body" id="cir-body" role="region" aria-label="Raw CIR JSON">
+          <pre id="cir-pre">No output yet.</pre>
+        </div>
       </div>
-    </div>
 
-  </aside>
+    </aside>
 
-  <!-- Canvas Area -->
-  <section class="canvas-area" role="main" aria-label="Visualization canvas">
-    
-    <!-- View Toolbar -->
-    <div class="view-toolbar">
-      <div class="view-tabs" role="tablist" aria-label="View modes">
-        <button class="view-tab" role="tab" aria-selected="true" id="tab-scene" aria-controls="canvas-wrapper" onclick="setView('scene')">Scene</button>
-        <button class="view-tab" role="tab" aria-selected="false" id="tab-attention" aria-controls="canvas-wrapper" onclick="setView('attention')">Attention</button>
-        <button class="view-tab" role="tab" aria-selected="false" id="tab-graph" aria-controls="canvas-wrapper" onclick="setView('graph')">Graph</button>
+    <!-- ── Canvas panel ── -->
+    <section class="canvas-panel" aria-label="Visualization">
+
+      <div class="canvas-toolbar">
+        <div class="view-tabs" role="tablist" aria-label="View mode">
+          <button class="vtab active" id="vt-scene" role="tab" aria-selected="true"
+            onclick="setView('scene')">Scene</button>
+          <button class="vtab" id="vt-attention" role="tab" aria-selected="false"
+            onclick="setView('attention')">Attention</button>
+          <button class="vtab" id="vt-graph" role="tab" aria-selected="false" onclick="setView('graph')">Graph</button>
+        </div>
+        <div class="frame-readout" id="frame-readout" aria-live="polite" aria-label="Current frame">Frame 0 / 150</div>
       </div>
-      <div class="frame-info" id="frame-info" aria-live="polite">Frame 0 / 150</div>
-    </div>
 
-    <!-- Canvas -->
-    <div class="canvas-wrapper" id="canvas-wrapper" role="img" aria-label="Animation visualization">
-      <div class="empty-state" id="empty-state">
-        <div class="empty-icon" aria-hidden="true">▶</div>
-        <p class="empty-text">Enter a prompt and click <strong>Compile & Visualize</strong> to generate an animated explanation.</p>
+      <div class="canvas-wrap" id="canvas-wrap">
+        <!-- Empty state -->
+        <div class="empty-state" id="empty-state" aria-label="Waiting for input">
+          <div class="empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="4,3 19,11 4,19" />
+            </svg>
+          </div>
+          <div class="empty-heading">Nothing to show yet</div>
+          <div class="empty-body">Write a prompt and hit <strong>Compile</strong> to generate an animated visual
+            explanation.</div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading-overlay" id="loading-overlay" role="status" aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
+          <div class="loading-msg" id="loading-msg">Compiling…</div>
+        </div>
+
+        <canvas id="stage" aria-label="Animation canvas" role="img"></canvas>
       </div>
-      <div class="loading-overlay" id="loading-overlay">
-        <div class="loading-spinner" aria-hidden="true"></div>
-        <div class="loading-text" id="loading-text">Compiling…</div>
+
+      <!-- Timeline -->
+      <div class="timeline" role="group" aria-label="Playback controls">
+        <button class="play-btn" id="play-btn" onclick="togglePlay()" aria-label="Play" disabled>
+          <svg id="play-icon" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <polygon points="2,1 11,6 2,11" />
+          </svg>
+        </button>
+        <input type="range" class="scrubber" id="scrubber" min="0" max="150" value="0" step="1"
+          oninput="scrubTo(this.value)" aria-label="Timeline position" disabled />
       </div>
-      <canvas id="stage" aria-label="Animation stage"></canvas>
-    </div>
 
-    <!-- Timeline -->
-    <div class="timeline">
-      <button 
-        class="play-btn" 
-        id="play-btn"
-        onclick="togglePlay()"
-        aria-label="Play or pause animation"
-        disabled
-      >▶</button>
-      <input 
-        type="range" 
-        class="scrubber" 
-        id="scrubber"
-        min="0"
-        max="150"
-        value="0"
-        oninput="scrubTo(this.value)"
-        aria-label="Timeline scrubber"
-        disabled
-      />
-    </div>
+    </section>
+  </div>
 
-  </section>
-</main>
+  <!-- Toast -->
+  <div id="toast" class="toast" role="alert" aria-live="assertive">
+    <span class="toast-dot" id="toast-dot"></span>
+    <span id="toast-msg"></span>
+  </div>
 
-<!-- Toast -->
-<div id="toast" role="alert" aria-live="assertive"></div>
+  <script>
+    const API = "https://nivix.onrender.com";
+    const FRAMES = 150;
+    const FPS = 60;
 
-<script>
-  // Configuration
-  const API_BASE = "https://nivix.onrender.com";
-  const MAX_FRAMES = 150;
+    let cir = null;
+    let frame = 0;
+    let playing = false;
+    let rafId = null;
+    let view = 'scene';
 
-  // State
-  let activeCIR = null;
-  let currentFrame = 0;
-  let isPlaying = false;
-  let animId = null;
-  let currentView = 'scene';
-  let apiLatency = null;
-  let lastError = null;
+    const canvas = document.getElementById('stage');
+    const ctx = canvas.getContext('2d');
 
-  // Canvas
-  const canvas = document.getElementById('stage');
-  const ctx = canvas.getContext('2d');
+    // ── Resize ──
+    function resize() {
+      const w = document.getElementById('canvas-wrap');
+      canvas.width = w.clientWidth;
+      canvas.height = w.clientHeight;
+      if (cir) renderFrame(frame);
+    }
+    window.addEventListener('resize', resize);
+    setTimeout(resize, 60);
 
-  function resizeCanvas() {
-    const wrapper = document.getElementById('canvas-wrapper');
-    canvas.width = wrapper.clientWidth;
-    canvas.height = wrapper.clientHeight;
-    if (activeCIR) renderFrame(currentFrame);
-    else renderEmpty();
-  }
-  window.addEventListener('resize', resizeCanvas);
-  setTimeout(resizeCanvas, 50);
-
-  // ─── Progress Bar ───
-  function updateProgress(step, percent) {
-    const steps = ['compile', 'validate', 'render', 'play'];
-    steps.forEach((s, i) => {
-      const indicator = document.getElementById('step-' + s);
-      const label = document.getElementById('label-' + s);
-      
-      if (i < step) {
-        indicator.className = 'step-indicator completed';
-        indicator.textContent = '✓';
-        label.className = 'step-label completed';
-      } else if (i === step) {
-        indicator.className = 'step-indicator active';
-        indicator.textContent = i + 1;
-        label.className = 'step-label active';
-      } else {
-        indicator.className = 'step-indicator';
-        indicator.textContent = i + 1;
-        label.className = 'step-label';
+    // ── Progress ──
+    function setProgress(activeStep, pct) {
+      for (let i = 0; i < 4; i++) {
+        const row = document.getElementById('pstep-' + i);
+        const dot = document.getElementById('pdot-' + i);
+        row.className = 'progress-step-row';
+        if (i < activeStep) { row.classList.add('completed'); dot.textContent = '✓'; }
+        else if (i === activeStep) { row.classList.add('active'); dot.textContent = i + 1; }
+        else { dot.textContent = i + 1; }
       }
+      const bar = document.getElementById('prog-bar');
+      const wrap = document.getElementById('prog-bar-wrap');
+      bar.style.width = pct + '%';
+      bar.classList.toggle('complete', pct === 100);
+      wrap.setAttribute('aria-valuenow', pct);
+    }
+    setProgress(-1, 0);
+
+    // ── API health ──
+    async function checkAPI() {
+      const dot = document.getElementById('api-dot');
+      const txt = document.getElementById('api-status-text');
+      const lat = document.getElementById('api-latency');
+      dot.className = 'api-dot connecting';
+      txt.textContent = 'Connecting…';
+      lat.textContent = '';
+
+      const t0 = performance.now();
+      try {
+        const r = await fetch(API + '/api/compile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: 'ping' }),
+          signal: AbortSignal.timeout(8000)
+        });
+        const ms = Math.round(performance.now() - t0);
+        if (r.ok || r.status === 400) {
+          dot.className = 'api-dot online';
+          txt.textContent = 'Connected';
+          lat.textContent = ms + 'ms';
+        } else throw new Error('HTTP ' + r.status);
+      } catch (e) {
+        dot.className = 'api-dot offline';
+        txt.textContent = 'Offline';
+        lat.textContent = '';
+      }
+    }
+    checkAPI();
+    setInterval(checkAPI, 25000);
+
+    // ── Keyboard ──
+    document.getElementById('prompt-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) compileCIR();
     });
-    document.getElementById('progress-pct').textContent = percent + '%';
-  }
 
-  // ─── API Status Check ───
-  async function checkAPIStatus() {
-    const indicator = document.getElementById('status-indicator');
-    const text = document.getElementById('status-text');
-    const latencyEl = document.getElementById('status-latency');
-    
-    indicator.className = 'status-indicator connecting';
-    text.textContent = 'Connecting…';
-    latencyEl.textContent = '';
+    // ── Compile ──
+    async function compileCIR() {
+      const prompt = document.getElementById('prompt-input').value.trim();
+      if (!prompt) { toast('Enter a prompt first', 'error'); return; }
 
-    const t0 = performance.now();
-    try {
-      const res = await fetch(API_BASE + '/api/compile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: 'ping' }),
-        signal: AbortSignal.timeout(8000)
+      const btn = document.getElementById('run-btn');
+      const btxt = document.getElementById('run-btn-text');
+      btn.disabled = true; btxt.textContent = 'Running…';
+
+      setProgress(0, 15);
+      showLoading('Compiling CIR…');
+
+      const t0 = performance.now();
+      try {
+        const res = await fetch(API + '/api/compile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt }),
+          signal: AbortSignal.timeout(30000)
+        });
+
+        const ms = Math.round(performance.now() - t0);
+        setProgress(1, 40);
+        showLoading('Validating schema…');
+        await sleep(280);
+
+        if (!res.ok) {
+          const err = await res.json();
+          setProgress(0, 0);
+          hideLoading();
+          toast('Validation failed: ' + (err.detail?.validation_report || res.status), 'error');
+          return;
+        }
+
+        const data = await res.json();
+        cir = data.cir;
+
+        setProgress(2, 70);
+        showLoading('Building frames…');
+        await sleep(200);
+
+        hideLoading();
+        setProgress(3, 100);
+
+        document.getElementById('empty-state').classList.add('gone');
+        document.getElementById('results-section').classList.add('visible');
+
+        const conf = cir.meta.semantic_confidence;
+        document.getElementById('r-nodes').textContent = cir.nodes.length;
+        setResultVal('r-conf', (conf * 100).toFixed(0) + '%', conf > .8 ? 'ok' : 'warn');
+        setResultVal('r-lat', ms + 'ms', 'ok');
+        setResultVal('r-status', 'OK', 'ok');
+
+        updateCIR(cir);
+        document.getElementById('api-latency').textContent = ms + 'ms';
+        document.getElementById('scrubber').disabled = false;
+        document.getElementById('play-btn').disabled = false;
+
+        frame = 0;
+        document.getElementById('scrubber').value = 0;
+        renderFrame(0);
+        toast('Compiled ' + cir.nodes.length + ' nodes in ' + ms + 'ms', 'success');
+
+      } catch (e) {
+        hideLoading(); setProgress(0, 0);
+        toast(e.name === 'TimeoutError' ? 'Request timed out' : 'Error: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false; btxt.textContent = 'Compile';
+      }
+    }
+
+    function setResultVal(id, val, cls) {
+      const el = document.getElementById(id);
+      el.textContent = val;
+      el.className = 'result-tile-val ' + (cls || '');
+    }
+
+    // ── CIR Toggle ──
+    function toggleCIR() {
+      const body = document.getElementById('cir-body');
+      const btn = document.getElementById('cir-toggle-btn');
+      const open = body.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open);
+    }
+
+    function updateCIR(data) {
+      const raw = JSON.stringify(data, null, 2);
+      const html = raw
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"([^"]+)":/g, '<span class="jk">"$1"</span>:')
+        .replace(/: "([^"]*)"/g, ': <span class="jv">"$1"</span>')
+        .replace(/: (\d+\.?\d*)/g, ': <span class="jn">$1</span>')
+        .replace(/: (true|false)/g, ': <span class="jb">$1</span>');
+      document.getElementById('cir-pre').innerHTML = html;
+    }
+
+    // ── View ──
+    function setView(v) {
+      view = v;
+      ['scene', 'attention', 'graph'].forEach(n => {
+        const t = document.getElementById('vt-' + n);
+        const on = n === v;
+        t.classList.toggle('active', on);
+        t.setAttribute('aria-selected', on);
       });
-      
-      apiLatency = Math.round(performance.now() - t0);
-      
-      if (res.ok || res.status === 400) {
-        indicator.className = 'status-indicator online';
-        text.textContent = 'Connected';
-        latencyEl.textContent = apiLatency + 'ms';
-        lastError = null;
-      } else {
-        throw new Error('Status ' + res.status);
-      }
-    } catch (e) {
-      indicator.className = 'status-indicator offline';
-      text.textContent = 'Offline';
-      latencyEl.textContent = '';
-      lastError = e.message;
-    }
-  }
-  checkAPIStatus();
-  setInterval(checkAPIStatus, 20000);
-
-  // ─── Compile ───
-  async function compileCIR() {
-    const prompt = document.getElementById('prompt-input').value.trim();
-    if (!prompt) {
-      showToast('Please enter a prompt first', 'error');
-      return;
+      if (cir) renderFrame(frame);
     }
 
-    const btn = document.getElementById('submit-btn');
-    const icon = document.getElementById('btn-icon');
-    const txt = document.getElementById('btn-text');
-    btn.disabled = true;
-    icon.textContent = '⏳';
-    txt.textContent = 'Compiling…';
+    // ── Render ──
+    const COLS = {
+      text: '#3b82f6', shape: '#8b5cf6', object: '#10b981',
+      plot: '#ec4899', math: '#f59e0b', highlight: '#f97316'
+    };
 
-    updateProgress(0, 10);
-    showLoading('Compiling CIR…');
+    function ease(t) { return 1 - Math.pow(1 - t, 3); }
 
-    const t0 = performance.now();
-    try {
-      const res = await fetch(API_BASE + '/api/compile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
-        signal: AbortSignal.timeout(30000)
-      });
-
-      const latency = Math.round(performance.now() - t0);
-      apiLatency = latency;
-
-      updateProgress(1, 30);
-      showLoading('Validating schema…');
-      await new Promise(r => setTimeout(r, 300));
-
-      if (!res.ok) {
-        const err = await res.json();
-        updateProgress(0, 0);
-        showToast('Validation Error: ' + (err.detail?.validation_report || 'Unknown'), 'error');
-        return;
-      }
-
-      const data = await res.json();
-      activeCIR = data.cir;
-
-      updateProgress(2, 60);
-      showLoading('Preparing render…');
-      await new Promise(r => setTimeout(r, 200));
-
-      // Update UI
-      hideLoading();
-      document.getElementById('empty-state').classList.add('hidden');
-      document.getElementById('results-section').classList.add('visible');
-      
-      // Update results
-      document.getElementById('result-status').textContent = 'Success';
-      document.getElementById('result-status').className = 'result-value success';
-      document.getElementById('result-nodes').textContent = activeCIR.nodes.length;
-      
-      const conf = activeCIR.meta.semantic_confidence;
-      const confEl = document.getElementById('result-confidence');
-      confEl.textContent = (conf * 100).toFixed(0) + '%';
-      confEl.className = 'result-value ' + (conf > 0.8 ? 'success' : 'warning');
-      
-      document.getElementById('result-latency').textContent = latency + 'ms';
-      
-      // Update JSON inspector
-      updateJSONInspector(activeCIR);
-      
-      // Enable timeline
-      currentFrame = 0;
-      document.getElementById('scrubber').value = 0;
-      document.getElementById('scrubber').disabled = false;
-      document.getElementById('play-btn').disabled = false;
-      
-      document.getElementById('status-latency').textContent = latency + 'ms';
-      
-      renderFrame(0);
-      
-      updateProgress(3, 100);
-      showToast('Compiled ' + activeCIR.nodes.length + ' nodes in ' + latency + 'ms', 'success');
-
-    } catch (e) {
-      hideLoading();
-      updateProgress(0, 0);
-      if (e.name === 'TimeoutError') {
-        showToast('Request timed out', 'error');
-      } else {
-        showToast('Error: ' + e.message, 'error');
-      }
-    } finally {
-      btn.disabled = false;
-      icon.textContent = '▶';
-      txt.textContent = 'Compile & Visualize';
-    }
-  }
-
-  // Keyboard shortcut
-  document.getElementById('prompt-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) compileCIR();
-  });
-
-  // ─── JSON Inspector Toggle ───
-  function toggleJSON() {
-    const content = document.getElementById('json-content');
-    const btn = document.getElementById('json-toggle-btn');
-    const icon = document.getElementById('json-toggle-icon');
-    
-    const isVisible = content.classList.toggle('visible');
-    btn.setAttribute('aria-expanded', isVisible);
-    icon.textContent = isVisible ? '▲' : '▼';
-  }
-
-  function updateJSONInspector(cir) {
-    const raw = JSON.stringify(cir, null, 2);
-    const html = raw
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
-      .replace(/: "([^"]*)"/g, ': <span class="json-str">"$1"</span>')
-      .replace(/: (\d+\.?\d*)/g, ': <span class="json-num">$1</span>')
-      .replace(/: (true|false)/g, ': <span class="json-bool">$1</span>');
-    document.getElementById('json-content').innerHTML = html;
-  }
-
-  // ─── View Switching ───
-  function setView(view) {
-    currentView = view;
-    ['scene', 'attention', 'graph'].forEach(v => {
-      const tab = document.getElementById('tab-' + v);
-      tab.setAttribute('aria-selected', v === view);
-    });
-    if (activeCIR) renderFrame(currentFrame);
-  }
-
-  // ─── Rendering ───
-  function renderEmpty() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
-  const NODE_COLORS = {
-    text: '#60a5fa', shape: '#a78bfa', object: '#34d399',
-    plot: '#f472b6', math: '#fbbf24', highlight: '#fb923c'
-  };
-
-  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
-
-  function getNodeState(node, frame) {
-    if (frame < (node.lifecycle.spawn || 0)) return null;
-    const cir = activeCIR;
-
-    let x = canvas.width / 2;
-    let y = canvas.height / 2;
-
-    const moveT = cir.transforms?.find(t => t.node_id === node.id && t.action === 'move');
-    if (moveT) {
-      const p = Math.min(Math.max((frame - moveT.start_frame) / (moveT.end_frame - moveT.start_frame), 0), 1);
-      const ep = easeOut(p);
+    function nodeState(node, f) {
+      if (f < (node.lifecycle.spawn || 0)) return null;
       const idx = cir.nodes.findIndex(n => n.id === node.id);
       const total = cir.nodes.length;
-      const targetX = (canvas.width / (total + 1)) * (idx + 1);
-      x = canvas.width / 2 + (targetX - canvas.width / 2) * ep;
-      y = canvas.height * 0.5;
-    } else {
-      const idx = cir.nodes.findIndex(n => n.id === node.id);
-      const total = cir.nodes.length;
-      x = (canvas.width / (total + 1)) * (idx + 1);
-      y = canvas.height * 0.5;
+      const W = canvas.width, H = canvas.height;
+      let x = (W / (total + 1)) * (idx + 1);
+      let y = H * .5;
+
+      const mv = (cir.transforms || []).find(t => t.node_id === node.id && t.action === 'move');
+      if (mv) {
+        const p = Math.min(Math.max((f - mv.start_frame) / (mv.end_frame - mv.start_frame), 0), 1);
+        x = W / 2 + (x - W / 2) * ease(p);
+      }
+
+      const sp = Math.min((f - (node.lifecycle.spawn || 0)) / 15, 1);
+      const focused = (cir.attention || []).find(a => a.node_id === node.id && f >= a.start_frame && f <= a.end_frame);
+      return { x, y, opacity: ease(sp), focused: !!focused, focusScore: focused?.focus_score || 0 };
     }
 
-    const spawnProgress = Math.min((frame - (node.lifecycle.spawn || 0)) / 15, 1);
-    const opacity = easeOut(spawnProgress);
+    function renderFrame(f) {
+      if (!cir) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (view === 'scene') renderScene(f);
+      else if (view === 'attention') renderAttention(f);
+      else renderGraph(f);
+      document.getElementById('frame-readout').textContent = 'Frame ' + f + ' / ' + FRAMES;
+      const pct = (f / FRAMES) * 100;
+      document.getElementById('scrubber').style.backgroundImage =
+        'linear-gradient(to right, var(--ink) ' + pct + '%, var(--line) ' + pct + '%)';
+    }
 
-    const focused = cir.attention?.find(a =>
-      a.node_id === node.id && frame >= a.start_frame && frame <= a.end_frame
-    );
+    function renderScene(f) {
+      (cir.nodes || []).forEach(node => {
+        const s = nodeState(node, f);
+        if (!s || s.opacity <= 0) return;
+        const { x, y, opacity, focused } = s;
+        const col = COLS[node.type] || '#94a3b8';
+        ctx.save();
+        ctx.globalAlpha = opacity;
 
-    return { x, y, opacity, focused: !!focused, focusScore: focused?.focus_score || 0 };
-  }
+        if (focused) {
+          ctx.beginPath(); ctx.arc(x, y, 60, 0, Math.PI * 2);
+          ctx.fillStyle = col + '18'; ctx.fill();
+          ctx.beginPath(); ctx.arc(x, y, 44, 0, Math.PI * 2);
+          ctx.strokeStyle = col + '55'; ctx.lineWidth = 1;
+          ctx.setLineDash([5, 4]); ctx.stroke(); ctx.setLineDash([]);
+        }
 
-  function renderFrame(frame) {
-    if (!activeCIR) return;
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-
-    if (currentView === 'scene') renderSceneView(frame);
-    else if (currentView === 'attention') renderAttentionView(frame);
-    else renderGraphView(frame);
-
-    document.getElementById('frame-info').textContent = `Frame ${frame} / ${MAX_FRAMES}`;
-    const pct = (frame / MAX_FRAMES) * 100;
-    document.getElementById('scrubber').style.background = `linear-gradient(to right, var(--accent) ${pct}%, var(--surface-raised) ${pct}%)`;
-  }
-
-  function renderSceneView(frame) {
-    const nodes = activeCIR.nodes || [];
-
-    nodes.forEach(node => {
-      const state = getNodeState(node, frame);
-      if (!state || state.opacity <= 0) return;
-
-      const { x, y, opacity, focused } = state;
-      const color = NODE_COLORS[node.type] || '#94a3b8';
-
-      ctx.save();
-      ctx.globalAlpha = opacity;
-
-      if (focused) {
-        const grad = ctx.createRadialGradient(x, y, 30, x, y, 80);
-        grad.addColorStop(0, color.replace(')', ', 0.15)').replace('rgb', 'rgba'));
-        grad.addColorStop(1, 'transparent');
-        ctx.beginPath();
-        ctx.arc(x, y, 80, 0, Math.PI * 2);
-        ctx.fillStyle = grad;
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(x, y, 48, 0, Math.PI * 2);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([6, 4]);
+        ctx.beginPath(); ctx.arc(x, y, 30, 0, Math.PI * 2);
+        ctx.fillStyle = col + (focused ? 'ee' : 'cc');
+        ctx.shadowColor = col; ctx.shadowBlur = focused ? 18 : 6;
+        ctx.fill(); ctx.shadowBlur = 0;
+        ctx.strokeStyle = col + 'ff'; ctx.lineWidth = focused ? 2 : 1;
         ctx.stroke();
-        ctx.setLineDash([]);
-      }
 
-      const grad2 = ctx.createRadialGradient(x - 8, y - 8, 2, x, y, 34);
-      grad2.addColorStop(0, color + 'ee');
-      grad2.addColorStop(1, color + '66');
-      ctx.beginPath();
-      ctx.arc(x, y, 34, 0, Math.PI * 2);
-      ctx.fillStyle = grad2;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = focused ? 20 : 8;
-      ctx.fill();
-      ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fff';
+        ctx.font = '500 11px "DM Sans", sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const label = (node.label || node.id).split(' ');
+        label.slice(0, 2).forEach((w, i) => ctx.fillText(w, x, y + (i - (Math.min(label.length, 2) - 1) / 2) * 13));
 
-      ctx.strokeStyle = color;
-      ctx.lineWidth = focused ? 2 : 1;
-      ctx.stroke();
-
-      ctx.fillStyle = '#fff';
-      ctx.font = '600 12px Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      const label = node.label || node.id;
-      const maxW = 56;
-      const words = label.split(' ');
-      let line = '', lines = [];
-      for (const w of words) {
-        const test = line + (line ? ' ' : '') + w;
-        if (ctx.measureText(test).width > maxW) { if (line) lines.push(line); line = w; }
-        else line = test;
-      }
-      lines.push(line);
-      lines.forEach((l, i) => ctx.fillText(l, x, y + (i - (lines.length - 1) / 2) * 14));
-
-      ctx.font = '500 10px Inter, sans-serif';
-      ctx.fillStyle = color;
-      ctx.fillText(node.type, x, y + 50);
-
-      ctx.restore();
-    });
-
-    (activeCIR.constraints || []).forEach(c => {
-      const nodeIds = c.nodes || [];
-      if (nodeIds.length < 2) return;
-      const states = nodeIds.map(id => {
-        const n = activeCIR.nodes.find(n => n.id === id);
-        return n ? getNodeState(n, frame) : null;
-      }).filter(Boolean);
-
-      if (states.length < 2) return;
-      for (let i = 0; i < states.length - 1; i++) {
-        const a = states[i], b = states[i + 1];
-        ctx.save();
-        ctx.globalAlpha = 0.2;
-        ctx.strokeStyle = '#94a3b8';
-        ctx.lineWidth = 1;
-        ctx.setLineDash([4, 6]);
-        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.restore();
-      }
-    });
-  }
-
-  function renderAttentionView(frame) {
-    const attention = activeCIR.attention || [];
-    const nodes = activeCIR.nodes || [];
-
-    nodes.forEach(node => {
-      const state = getNodeState(node, frame);
-      if (!state) return;
-      const attn = attention.find(a => a.node_id === node.id && frame >= a.start_frame && frame <= a.end_frame);
-      const score = attn ? attn.focus_score : 0;
-      const color = NODE_COLORS[node.type] || '#94a3b8';
-
-      ctx.save();
-      ctx.globalAlpha = 0.2 + score * 0.8;
-      ctx.beginPath(); ctx.arc(state.x, state.y, 20 + score * 50, 0, Math.PI * 2);
-      ctx.fillStyle = color;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 13px Inter';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText((score * 100).toFixed(0) + '%', state.x, state.y);
-      ctx.restore();
-    });
-  }
-
-  function renderGraphView(frame) {
-    const nodes = activeCIR.nodes || [];
-    const constraints = activeCIR.constraints || [];
-    const states = {};
-    nodes.forEach(n => { const s = getNodeState(n, frame); if (s) states[n.id] = s; });
-
-    constraints.forEach(c => {
-      (c.nodes || []).forEach((id, i) => {
-        if (i === 0) return;
-        const prev = states[(c.nodes)[i - 1]];
-        const curr = states[id];
-        if (!prev || !curr) return;
-        ctx.save();
-        ctx.strokeStyle = '#7dd3fc';
-        ctx.lineWidth = 1.5;
-        ctx.globalAlpha = 0.5;
-        ctx.beginPath(); ctx.moveTo(prev.x, prev.y); ctx.lineTo(curr.x, curr.y); ctx.stroke();
-        const angle = Math.atan2(curr.y - prev.y, curr.x - prev.x);
-        const mx = (prev.x + curr.x) / 2, my = (prev.y + curr.y) / 2;
-        ctx.globalAlpha = 0.8;
-        ctx.fillStyle = '#7dd3fc';
-        ctx.beginPath();
-        ctx.moveTo(mx + Math.cos(angle) * 8, my + Math.sin(angle) * 8);
-        ctx.lineTo(mx + Math.cos(angle - 2.5) * 6, my + Math.sin(angle - 2.5) * 6);
-        ctx.lineTo(mx + Math.cos(angle + 2.5) * 6, my + Math.sin(angle + 2.5) * 6);
-        ctx.fill();
-        ctx.restore();
-
-        ctx.save();
-        ctx.globalAlpha = 0.6;
-        ctx.font = '11px Inter';
-        ctx.fillStyle = '#7dd3fc';
-        ctx.textAlign = 'center';
-        ctx.fillText(c.type, mx, my - 10);
+        ctx.font = '400 9px "DM Sans", sans-serif';
+        ctx.fillStyle = col; ctx.textBaseline = 'top';
+        ctx.fillText(node.type, x, y + 34);
         ctx.restore();
       });
-    });
 
-    Object.entries(states).forEach(([id, s]) => {
-      const n = nodes.find(n => n.id === id);
-      const color = NODE_COLORS[n?.type] || '#94a3b8';
-      ctx.save();
-      ctx.beginPath(); ctx.arc(s.x, s.y, 22, 0, Math.PI * 2);
-      ctx.fillStyle = color + '33';
-      ctx.fill();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.fillStyle = '#fff';
-      ctx.font = '11px Inter';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(id, s.x, s.y);
-      ctx.restore();
-    });
-  }
-
-  // ─── Playback ───
-  function tick() {
-    if (!isPlaying) return;
-    currentFrame = Math.min(currentFrame + 1, MAX_FRAMES);
-    document.getElementById('scrubber').value = currentFrame;
-    renderFrame(currentFrame);
-    if (currentFrame >= MAX_FRAMES) {
-      isPlaying = false;
-      document.getElementById('play-btn').textContent = '▶';
-      return;
+      (cir.constraints || []).forEach(c => {
+        const ids = c.nodes || [];
+        if (ids.length < 2) return;
+        const states = ids.map(id => { const n = cir.nodes.find(n => n.id === id); return n ? nodeState(n, f) : null; }).filter(Boolean);
+        for (let i = 0; i < states.length - 1; i++) {
+          const a = states[i], b = states[i + 1];
+          ctx.save(); ctx.globalAlpha = .15;
+          ctx.strokeStyle = '#888'; ctx.lineWidth = 1;
+          ctx.setLineDash([3, 5]);
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          ctx.setLineDash([]); ctx.restore();
+        }
+      });
     }
-    animId = requestAnimationFrame(() => setTimeout(tick, 1000 / 60));
-  }
 
-  function togglePlay() {
-    if (!activeCIR) { showToast('Compile a prompt first', 'info'); return; }
-    isPlaying = !isPlaying;
-    document.getElementById('play-btn').textContent = isPlaying ? '⏸' : '▶';
-    if (isPlaying) {
-      if (currentFrame >= MAX_FRAMES) currentFrame = 0;
-      tick();
+    function renderAttention(f) {
+      (cir.nodes || []).forEach(node => {
+        const s = nodeState(node, f);
+        if (!s) return;
+        const attn = (cir.attention || []).find(a => a.node_id === node.id && f >= a.start_frame && f <= a.end_frame);
+        const score = attn ? attn.focus_score : 0;
+        const col = COLS[node.type] || '#94a3b8';
+        ctx.save();
+        ctx.globalAlpha = .15 + score * .75;
+        ctx.beginPath(); ctx.arc(s.x, s.y, 18 + score * 45, 0, Math.PI * 2);
+        ctx.fillStyle = col; ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px "DM Mono", monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(Math.round(score * 100) + '%', s.x, s.y);
+        ctx.restore();
+      });
     }
-  }
 
-  function scrubTo(val) {
-    currentFrame = parseInt(val);
-    if (activeCIR) renderFrame(currentFrame);
-  }
+    function renderGraph(f) {
+      const nodes = cir.nodes || [];
+      const states = {};
+      nodes.forEach(n => { const s = nodeState(n, f); if (s) states[n.id] = s; });
 
-  // ─── Loading ───
-  function showLoading(msg) {
-    const el = document.getElementById('loading-overlay');
-    document.getElementById('loading-text').textContent = msg || 'Loading…';
-    el.classList.add('visible');
-  }
-  function hideLoading() {
-    document.getElementById('loading-overlay').classList.remove('visible');
-  }
+      (cir.constraints || []).forEach(c => {
+        (c.nodes || []).forEach((id, i) => {
+          if (!i) return;
+          const a = states[(c.nodes)[i - 1]], b = states[id];
+          if (!a || !b) return;
+          const angle = Math.atan2(b.y - a.y, b.x - a.x);
+          const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+          ctx.save();
+          ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 1.5; ctx.globalAlpha = .45;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          ctx.globalAlpha = .8; ctx.fillStyle = '#60a5fa';
+          ctx.beginPath();
+          ctx.moveTo(mx + Math.cos(angle) * 8, my + Math.sin(angle) * 8);
+          ctx.lineTo(mx + Math.cos(angle - 2.5) * 5, my + Math.sin(angle - 2.5) * 5);
+          ctx.lineTo(mx + Math.cos(angle + 2.5) * 5, my + Math.sin(angle + 2.5) * 5);
+          ctx.fill();
+          ctx.font = '10px "DM Sans"'; ctx.fillStyle = '#60a5fa';
+          ctx.textAlign = 'center'; ctx.globalAlpha = .7;
+          ctx.fillText(c.type, mx, my - 9);
+          ctx.restore();
+        });
+      });
 
-  // ─── Toast ───
-  let toastTimeout;
-  function showToast(msg, type = 'info') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'show ' + type;
-    clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => { t.className = type; }, 3500);
-  }
+      Object.entries(states).forEach(([id, s]) => {
+        const n = nodes.find(n => n.id === id);
+        const col = COLS[n?.type] || '#94a3b8';
+        ctx.save();
+        ctx.beginPath(); ctx.arc(s.x, s.y, 20, 0, Math.PI * 2);
+        ctx.fillStyle = col + '28'; ctx.fill();
+        ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.font = '10px "DM Mono"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(id, s.x, s.y);
+        ctx.restore();
+      });
+    }
 
-  // Initialize progress
-  updateProgress(-1, 0);
-</script>
+    // ── Playback ──
+    let lastTick = 0;
+    function tick(ts) {
+      if (!playing) return;
+      if (ts - lastTick >= 1000 / FPS) {
+        lastTick = ts;
+        frame = Math.min(frame + 1, FRAMES);
+        document.getElementById('scrubber').value = frame;
+        renderFrame(frame);
+        if (frame >= FRAMES) { playing = false; updatePlayIcon(); return; }
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function togglePlay() {
+      if (!cir) { toast('Compile a prompt first', 'info'); return; }
+      playing = !playing;
+      updatePlayIcon();
+      if (playing) { if (frame >= FRAMES) frame = 0; rafId = requestAnimationFrame(tick); }
+      else cancelAnimationFrame(rafId);
+    }
+
+    function updatePlayIcon() {
+      document.getElementById('play-btn').setAttribute('aria-label', playing ? 'Pause' : 'Play');
+      document.getElementById('play-icon').innerHTML = playing
+        ? '<rect x="2" y="1" width="3" height="10"/><rect x="7" y="1" width="3" height="10"/>'
+        : '<polygon points="2,1 11,6 2,11"/>';
+    }
+
+    function scrubTo(v) {
+      frame = parseInt(v);
+      if (cir) renderFrame(frame);
+    }
+
+    // ── Loading ──
+    function showLoading(msg) {
+      const o = document.getElementById('loading-overlay');
+      document.getElementById('loading-msg').textContent = msg;
+      o.classList.add('on');
+    }
+    function hideLoading() { document.getElementById('loading-overlay').classList.remove('on'); }
+
+    // ── Toast ──
+    let toastTimer;
+    function toast(msg, type = 'info') {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      t.className = 'toast show ' + type;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.classList.remove('show'); }, 3800);
+    }
+
+    // ── Util ──
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+  </script>
 </body>
+
 </html>
