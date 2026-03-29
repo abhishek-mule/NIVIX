@@ -125,8 +125,8 @@ app.add_middleware(
 )
 
 class CompileRequest(BaseModel):
-    prompt: str = None
-    expression: str = None
+    prompt: str = ""
+    expression: str = ""
 
 def generate_v4_cir(prompt: str) -> dict:
     """
@@ -242,12 +242,14 @@ async def compile_endpoint(request: CompileRequest):
     Consumes a prompt OR expression, generates Execution Graph (CIR), validates against strict Schema.
     """
     # Handle expression input
-    if request.expression:
+    if request.expression and request.expression.strip():
         print(f"--- [API] Received Expression: '{request.expression}' ---")
         cir = parse_expression(request.expression)
-    else:
+    elif request.prompt and request.prompt.strip():
         print(f"--- [API] Received Prompt: '{request.prompt}' ---")
         cir = generate_v4_cir(request.prompt)
+    else:
+        raise HTTPException(status_code=400, detail={"error": "Either prompt or expression required"})
     
     # 2. Strict Schema Validation
     is_valid, error_msg = validate_cir(cir)
