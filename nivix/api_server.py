@@ -293,6 +293,35 @@ async def compile_endpoint(request: CompileRequest):
         }
     }
 
+@app.post("/api/v2/compile")
+async def compile_v2(body: dict):
+    """
+    Direct JSON endpoint - bypasses Pydantic validation entirely.
+    Accepts any of: expression, prompt, text, query, input
+    """
+    content = (
+        body.get("expression") or 
+        body.get("prompt") or 
+        body.get("text") or 
+        body.get("query") or
+        body.get("input") or
+        ""
+    )
+    if not content or not content.strip():
+        raise HTTPException(status_code=400, detail={"error": "Content required"})
+    
+    # Math expression detection
+    if re.match(r"^\([a-z]\+[a-z]", content, re.IGNORECASE):
+        cir = parse_expression(content)
+    else:
+        cir = generate_v4_cir(content)
+    
+    is_valid, error_msg = validate_cir(cir)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail={"error": "Validation failed", "report": error_msg})
+    
+    return {"status": "success", "cir": cir}
+
 if __name__ == "__main__":
     print("--- Booting Nivix Schema-Aware Operations API v4.0 ---")
     uvicorn.run(app, host="0.0.0.0", port=8000)
