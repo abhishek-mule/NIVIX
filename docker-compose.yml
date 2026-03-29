@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  nivix:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+    volumes:
+      - ./output:/app/output
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/compile"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  renderer:
+    build: .
+    command: ["python", "-c", "from nivix.renderers.manim_adapter import ManimAdapter; print('Manim ready')"]
+    profiles:
+      - render

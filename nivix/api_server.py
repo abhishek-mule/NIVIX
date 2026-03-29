@@ -323,6 +323,65 @@ async def compile_v2(body: dict):
     
     return {"status": "success", "cir": cir}
 
+
+@app.post("/api/render")
+async def render_endpoint(body: dict):
+    """
+    Render CIR to video format.
+    Accepts: expression, prompt, text, query + target format
+    Returns: video file path or URL
+    """
+    content = (
+        body.get("expression") or 
+        body.get("prompt") or 
+        body.get("text") or 
+        body.get("query") or
+        ""
+    )
+    target = body.get("target", "png")  # mp4, gif, png
+    
+    if not content or not content.strip():
+        raise HTTPException(status_code=400, detail={"error": "Content required"})
+    
+    # Generate CIR
+    if re.match(r"^\([a-z]\+[a-z]", content, re.IGNORECASE):
+        cir = parse_expression(content)
+    else:
+        cir = generate_v4_cir(content)
+    
+    is_valid, error_msg = validate_cir(cir)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail={"error": "Validation failed"})
+    
+    # Render using Manim adapter (if available)
+    try:
+        from nivix.renderers.manim_adapter import ManimAdapter
+        adapter = ManimAdapter(cir)
+        output_path = adapter.export()
+        
+        return {
+            "status": "success",
+            "cir": cir,
+            "render": {
+                "adapter": "manim",
+                "output": output_path,
+                "format": target
+            }
+        }
+    except ImportError:
+        # Manim not installed - return CIR for external rendering
+        return {
+            "status": "success",
+            "cir": cir,
+            "render": {
+                "adapter": "none",
+                "message": "Install manim locally for video output",
+                "format": target
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail={"error": f"Render failed: {str(e)}"})
+
 if __name__ == "__main__":
     print("--- Booting Nivix Schema-Aware Operations API v4.0 ---")
     uvicorn.run(app, host="0.0.0.0", port=8000)
