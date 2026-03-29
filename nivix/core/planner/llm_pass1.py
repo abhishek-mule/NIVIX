@@ -20,13 +20,13 @@ CACHE_DIR = os.path.join(os.path.dirname(__file__), ".pass1_cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 # OpenRouter free model fallback chain (tried in order)
-# All are free-tier. If one is overloaded or fails, next is tried automatically.
+# Updated - using currently available free models
 FREE_MODEL_CHAIN = [
-    "meta-llama/llama-3.1-8b-instruct:free",
-    "mistralai/mistral-7b-instruct:free",
-    "google/gemma-3-12b-it:free",
-    "microsoft/phi-3-mini-128k-instruct:free",
+    "google/gemma-2-9b-it:free",
+    "deepseek/deepseek-chat:free",
     "qwen/qwen-2-7b-instruct:free",
+    "mistralai/mistral-7b-instruct:free",
+    "cognitive/computor-7b-instruct:free",
 ]
 
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
@@ -107,10 +107,11 @@ def _run_openrouter_pass1(prompt: str, api_key: str) -> dict:
     All are free-tier. No credit card required.
     """
     last_error = None
+    print(f"[LLM] Starting with {len(FREE_MODEL_CHAIN)} models in chain")
 
-    for model in FREE_MODEL_CHAIN:
+    for i, model in enumerate(FREE_MODEL_CHAIN):
         try:
-            print(f"[PASS 1] Trying model: {model}")
+            print(f"[LLM] Model {i+1}/{len(FREE_MODEL_CHAIN)}: {model}")
             t0 = time.time()
 
             payload = json.dumps({
