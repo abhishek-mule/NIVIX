@@ -2,9 +2,9 @@
 # Added debugging for repair stage v2.1.
 
 import json
-from config.models import MODEL_PRIORITY
-from core.parser.request import send_request
-from core.repair.json_fixer import fix_json_syntax
+from nivix.config.models import MODEL_PRIORITY
+from nivix.core.parser.request import send_request
+from nivix.core.repair.json_fixer import fix_json_syntax
 
 def call_with_fallback(prompt):
     """

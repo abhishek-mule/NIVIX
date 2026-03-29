@@ -1,14 +1,14 @@
 # Nivix Execution Pass Manager v3.5
 # Tiered Semantic-Aware Optimization Pipeline.
 
-from core.compiler.cir import CIREventType
-from core.renderers.capability_matrix import negotiate
-from core.compiler.layout_solver import solve_layout
-from core.compiler.temporal_solver import solve_timing
-from core.compiler.trace_builder import capture_trace
-from core.compiler.semantic_validator import validate
-from core.compiler.hierarchical_layout import apply_hierarchical_layout
-from core.planner.intent_checker import audit_intent
+from nivix.core.compiler.cir import CIREventType
+from nivix.core.renderers.capability_matrix import negotiate
+from nivix.core.compiler.layout_solver import solve_layout
+from nivix.core.compiler.temporal_solver import solve_timing
+from nivix.core.compiler.trace_builder import capture_trace
+from nivix.core.compiler.semantic_validator import validate
+from nivix.core.compiler.hierarchical_layout import apply_hierarchical_layout
+from nivix.core.planner.intent_checker import audit_intent
 
 class ExecutionPassManager:
     """

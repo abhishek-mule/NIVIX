@@ -1,4 +1,4 @@
-from core.planner.templates import get_scene_block
+from nivix.core.planner.templates import get_scene_block
 
 class IntentGraphBuilder:
     """

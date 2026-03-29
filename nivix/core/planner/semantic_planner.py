@@ -1,8 +1,7 @@
-from core.planner.planner_router import route_planning
-from core.planner.object_graph_builder import build_objects
-from core.planner.transformation_graph_builder import build_transforms
-from core.planner.attention_graph_builder import build_attention_plan
-from core.compiler.pass_manager import run_optimization_passes
+from nivix.core.planner.planner_router import route_planning
+from nivix.core.planner.object_graph_builder import build_objects
+from nivix.core.planner.transformation_graph_builder import build_transforms
+from nivix.core.planner.attention_graph_builder import build_attention_plan
 
 class SemanticPlanner:
     """
@@ -45,12 +44,12 @@ class SemanticPlanner:
         
         # 9. COMPILER NORMALIZATION (v2.7)
         # Convert multi-graph symbolic structure into Canonical IR (CIR)
-        from core.compiler.cir import create_cir
+        from nivix.core.compiler.cir import create_cir
         cir_plan = create_cir(plan_data)
         
         # 10. CIR OPTIMIZATION PASSES (v2.7)
         # Strategic refinement on standardized execution primitives
-        from core.compiler.pass_manager import optimize_cir
+        from nivix.core.compiler.pass_manager import optimize_cir
         optimized_cir = optimize_cir(cir_plan.to_dict(), backend="manim")
         
         # 11. Attach Confidence & Result
@@ -96,7 +95,7 @@ class SemanticPlanner:
         
         # Rule: Always title-first
         if nodes[0].get("scene_type") != "title":
-            from core.planner.templates import get_scene_block
+            from nivix.core.planner.templates import get_scene_block
             title_node = {
                 "id": "scene_safety_title",
                 "scene_type": "title",

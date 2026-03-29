@@ -2,7 +2,7 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from core.planner.llm_pass1 import run_pass1_nodes
+from nivix.core.planner.llm_pass1 import run_pass1_nodes
 
 test_prompts = [
     "explain why imaginary numbers exist",

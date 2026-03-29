@@ -2,8 +2,8 @@
 # Directly tests the fault-tolerance layer against hostile JSON input.
 
 import json
-from core.repair.json_fixer import safe_parse
-from core.repair.schema_normalizer import produce_normalized_intent
+from nivix.core.repair.json_fixer import safe_parse
+from nivix.core.repair.schema_normalizer import produce_normalized_intent
 
 # Hostile JSON Scenario (Markdown, Unquoted keys/values, Trailing commas, String literals)
 HOSTILE_JSON = """

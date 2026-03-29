@@ -1,8 +1,8 @@
 # Nivix Track Scheduler Engine v2.15
 # Performance-Aware Orchestration with Hierarchy and CINEMATIC Transitions (v1.7/v1.9).
 
-from core.scheduler.temporal_graph import TemporalGraph
-from core.scheduler.conflict_detector import ConflictDetector, TemporalDependencyCycleError
+from nivix.core.scheduler.temporal_graph import TemporalGraph
+from nivix.core.scheduler.conflict_detector import ConflictDetector, TemporalDependencyCycleError
 
 def _unwrap(val):
     if isinstance(val, dict) and "value" in val: return val["value"]

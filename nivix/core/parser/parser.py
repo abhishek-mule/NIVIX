@@ -1,5 +1,5 @@
 import json
-from core.fallback.loader import call_with_fallback
+from nivix.core.fallback.loader import call_with_fallback
 
 def parse_prompt(semantic_plan):
     """

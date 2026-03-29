@@ -1,7 +1,7 @@
 import json
-from core.fallback.loader import call_with_fallback
-from core.planner.templates import get_scene_block, list_scene_types
-from core.planner.intent_graph_builder import compose_graph
+from nivix.core.fallback.loader import call_with_fallback
+from nivix.core.planner.templates import get_scene_block, list_scene_types
+from nivix.core.planner.intent_graph_builder import compose_graph
 
 class PlannerRouter:
     """
@@ -78,7 +78,7 @@ Schema (JSON only):
   "suggested_scenes": ["title_card", "concept_hook", "...", "summary_recap"]
 }}
 """
-        from core.parser.request import send_request
+        from nivix.core.parser.request import send_request
         response = send_request(model, planner_prompt)
         return json.loads(response)
 

@@ -2,10 +2,10 @@
 # Main Execution Engine and Pipeline Coordinator
 
 import json
-from core.parser.parser import parse_prompt
-from core.validator.validator import validate
-from core.policy.defaults import apply_defaults
-from core.scenegraph.builder import build
+from nivix.core.parser.parser import parse_prompt
+from nivix.core.validator.validator import validate
+from nivix.core.policy.defaults import apply_defaults
+from nivix.core.scenegraph.builder import build
 
 def nivix_pipeline():
     """

@@ -1,20 +1,20 @@
 
 import json
-from core.parser.parser import parse_prompt
-from core.repair.json_fixer import safe_parse
-from core.repair.schema_normalizer import produce_normalized_intent
-from core.validator.validator import validate
-from core.policy.semantic_map import normalize_semantics
-from core.policy.defaults import apply_defaults
-from core.ir.lowering_pass import produce_execution_ir
-from core.scheduler.track_scheduler import schedule_tracks
-from core.compiler.scene_segmenter import segment_scenes
-from core.optimizer.timeline_optimizer import optimize_timeline
-from core.layout.layout_engine import apply_layout
-from core.camera.camera_engine import apply_camera
-from core.scenegraph.builder import build
-from core.renderers.renderer_pass import produce_video
-from renderers.manim_adapter.manim_adapter import ManimAdapter
+from nivix.core.parser.parser import parse_prompt
+from nivix.core.repair.json_fixer import safe_parse
+from nivix.core.repair.schema_normalizer import produce_normalized_intent
+from nivix.core.validator.validator import validate
+from nivix.core.policy.semantic_map import normalize_semantics
+from nivix.core.policy.defaults import apply_defaults
+from nivix.core.ir.lowering_pass import produce_execution_ir
+from nivix.core.scheduler.track_scheduler import schedule_tracks
+from nivix.core.compiler.scene_segmenter import segment_scenes
+from nivix.core.optimizer.timeline_optimizer import optimize_timeline
+from nivix.core.layout.layout_engine import apply_layout
+from nivix.core.camera.camera_engine import apply_camera
+from nivix.core.scenegraph.builder import build
+from nivix.core.renderers.renderer_pass import produce_video
+from nivix.renderers.manim_adapter.manim_adapter import ManimAdapter
 
 def test_pipeline():
     print("--- [TEST] Nivix v1.13 Rendering Pipeline ---")
